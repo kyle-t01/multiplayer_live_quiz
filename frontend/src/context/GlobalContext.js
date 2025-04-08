@@ -12,7 +12,7 @@ export const GlobalContextProvider = ({ children }) => {
     const [lobby, setLobby] = useState([]);
     const [hasGameStarted, setHasGameStarted] = useState(false);
     const [question, setQuestion] = useState(null);
-    const [userAnswer, setUserAnswer] = useState([]);
+    const [userAnswer, setUserAnswer] = useState(null);
 
     return (
         <GlobalContext.Provider
