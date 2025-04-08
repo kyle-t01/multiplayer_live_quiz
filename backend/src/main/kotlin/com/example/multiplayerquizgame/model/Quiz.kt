@@ -77,8 +77,8 @@ data class Quiz(
         return (currentIndex > questionList.size)
     }
 
-    // get next questions
-    fun getNext():Question? {
+    // get next question
+    fun getNextQ():Question? {
         currentIndex += 1
         return when (isFinished()) {
             true -> {
@@ -90,5 +90,17 @@ data class Quiz(
             }
         }
     }
+
+    // get current question, isFinished() must be called beforehand
+    fun getCurrentQ():Question {
+        return questionList[currentIndex]
+    }
+
+    // get current answer(s), isFinished() must be called beforehand
+    fun getCurrentA():List<Int> {
+        return questionList[currentIndex].answers
+    }
+
+
 
 }
