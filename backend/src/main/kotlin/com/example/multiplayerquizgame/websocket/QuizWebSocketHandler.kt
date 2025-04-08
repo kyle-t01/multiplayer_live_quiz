@@ -24,7 +24,10 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
 
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
+        val player= lobby.players[session]
+        println("$player LEFT the game!")
         lobby.players.remove(session)
+
     }
 
     // handle game events
