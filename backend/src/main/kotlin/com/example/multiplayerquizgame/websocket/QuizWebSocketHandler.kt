@@ -83,10 +83,24 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 emitToAll(GameEvent(GameEventType.START, q))
             }
             GameEventType.ANSWER -> {
-                // to implement
-                val ans = json.get("data").asText()
+                // extract message
+                val ans:Int = json.get("data").asText().toInt()
                 val player = lobby.players[session]
-                println("$player has answered $ans")
+
+
+                // see if answer was correct, and do something with player score
+                if (lobby.quiz.getCurrentA().contains(ans)) {
+                    println("$player has answered $ans [V] correct")
+                    player!!.qCorrect += 1
+                } else {
+                    println("$player has answered $ans [X] incorrect")
+                }
+                // tell player the actual correct answer(s)
+                emit(session, GameEvent(GameEventType.ANSWER, lobby.quiz.getCurrentA()))
+
+                // broadcast state change to everyone
+                emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, lobby.players.values))
+
             }
             GameEventType.LEAVE -> {
                 println("Unexpected Usage! - The only way to leave a lobby is to close the page!")
