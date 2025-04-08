@@ -1,5 +1,7 @@
 package com.example.multiplayerquizgame.model
 
+import java.awt.desktop.QuitStrategy
+
 val q1 = Question("What is the FIRST LAW OF ROBOTICS according to Isaac Asimov?",
     options = listOf(
         "A robot must obey the orders given it by human beings",
@@ -61,11 +63,13 @@ data class Quiz(
     var currentIndex: Int = 0,
 
 ) {
-    // load questions into quiz from CSV file (hard-coded for now)
-    fun loadQuiz() {
+    // load questions into quiz from CSV file (hard-coded for now), and return first question
+    fun loadQuiz(): Question {
         questionList.clear()
         currentIndex = 0
         questionList.addAll(mutableListOf(q1, q2, q3, q4, q5, q6, q7))
+        // null-safety: since questions are hard-coded, assume impossible to be null
+        return questionList[0]
     }
 
     // have we finished all questions in the quiz
