@@ -1,11 +1,7 @@
 package com.example.multiplayerquizgame.websocket
 
-// models
-import com.example.multiplayerquizgame.model.GameEvent
-import com.example.multiplayerquizgame.model.GameEventType
-import com.example.multiplayerquizgame.model.Lobby
-import com.example.multiplayerquizgame.model.Player
-import com.example.multiplayerquizgame.model.Quiz
+// models:
+import com.example.multiplayerquizgame.model.*
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.context.annotation.Configuration
@@ -41,24 +37,42 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
             GameEventType.JOIN -> {
                 val name = json.get("data").asText()
                 val player = Player(name)
-                lobby.players[session] = player
-                val playerList = lobby.players.values
                 println("${player.name} JOINED THE LOBBY")
-                // signal to the player
+                // associate the session with this player
+                lobby.players[session] = player
+
+                // signal to the player, of successful JOIN
                 emit(session,GameEvent(GameEventType.JOIN, player))
+
                 // signal to all players, the updated lobby
+                val playerList = lobby.players.values
                 emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, playerList))
             }
+            GameEventType.START -> {
+
+                if (lobby.isGameStarted) {
+                    // game already started
+                    return
+                }
+                // start the game
+                lobby.isGameStarted = true
+
+                // load the quiz questions and get the first question
+                val q = lobby.quiz.loadQuiz()
+
+                // signal to all players, that the Game has Started, and the first question!
+                emitToAll(GameEvent(GameEventType.START, q))
+            }
             GameEventType.ANSWER -> {
+                // to implement
                 val ans = json.get("data").asText()
                 println("You tried to answer with $ans")
             }
             GameEventType.LEAVE -> {
-                println("YOU LEFT THE GAME")
-                // disconnect
+                println("Unexpected Usage! - The only way to leave a lobby is to close the page!")
             }
             GameEventType.LOBBY_UPDATE -> {
-                println("GameEventType: lobby update")
+                println("Unexpected Usage! - Client shouldn't need to ask for lobby updates!")
             }
         }
     }
