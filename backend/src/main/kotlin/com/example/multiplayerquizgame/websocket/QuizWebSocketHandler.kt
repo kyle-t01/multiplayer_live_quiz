@@ -38,16 +38,21 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         val json = mapper.readTree(message.payload)
         val type = json.get("type").asText()
+        val data = json.get("data").asText()
+
+        // print game events sent by players to terminal
+        println("$type: $data")
+
         when (GameEventType.valueOf(type.uppercase())) {
             GameEventType.JOIN -> {
                 val name = json.get("data").asText()
                 val player = Player(name)
-                println("${player.name} JOINED THE LOBBY")
                 // associate the session with this player
                 lobby.players[session] = player
                 // did this player join when the game already started?
                 if (lobby.isGameStarted) {
                     // then KICK the player
+                    println("Kicking ${player.name} from game.")
                     emit(session, GameEvent(GameEventType.KICK, player))
                     return
                 }
@@ -64,11 +69,10 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
 
                 if (lobby.isGameStarted) {
                     // game already started
-                    println("Game has already started!")
                     return
                 }
                 // start the game
-                println("Game has started!")
+                println("Game has officially started.")
                 lobby.isGameStarted = true
 
                 // load the quiz questions and get the first question
@@ -80,7 +84,8 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
             GameEventType.ANSWER -> {
                 // to implement
                 val ans = json.get("data").asText()
-                println("You tried to answer with $ans")
+                val player = lobby.players[session]
+                println("$player has answered $ans")
             }
             GameEventType.LEAVE -> {
                 println("Unexpected Usage! - The only way to leave a lobby is to close the page!")
