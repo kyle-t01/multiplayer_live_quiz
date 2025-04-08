@@ -42,9 +42,9 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 val playerList = lobby.players.values
                 println("${player.name} JOINED THE LOBBY")
                 // signal to the player
-                emit(session,GameEvent(GameEventType.JOIN, player.name))
+                emit(session,GameEvent(GameEventType.JOIN, player))
                 // signal to all players, the updated lobby
-                emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, playerList.toString()))
+                emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, playerList))
             }
             GameEventType.ANSWER -> {
                 val ans = json.get("data").asText()
