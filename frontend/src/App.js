@@ -1,16 +1,24 @@
 import { useEffect, useState, useRef, } from 'react';
+import { GlobalVars } from './context/GlobalContext';
 
 function App() {
 	const socketRef = useRef(null);
-	const [playerName, setPlayerName] = useState("");
-	const [hasJoined, setHasJoined] = useState(false);
-	const [lobby, setLobby] = useState([]);
-	const [hasGameStarted, setHasGameStarted] = useState(false)
+	// global variables
+	const { playerName, setPlayerName,
+		hasJoined, setHasJoined,
+		lobby, setLobby,
+		hasGameStarted, setHasGameStarted,
+		question, setQuestion,
+		userAnswer, setUserAnswer } = GlobalVars();
 
 	// when the player joins the lobby, open connection to websocket
 	const handlePlayerJoin = () => {
 		if (!playerName.trim()) return;
 
+		// close existing socket
+		if (socketRef.current) {
+			socketRef.current.close();
+		}
 		// attempt connection
 		if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
 			socketRef.current = new WebSocket('ws://localhost:8080/quiz');
@@ -42,7 +50,8 @@ function App() {
 
 			// check if game has started, and retrieve first question
 			if (message.type == "START") {
-				setHasGameStarted(true)
+				setHasGameStarted(true);
+				setQuestion(message.data);
 				console.log("Starting or Joining an existing game!");
 			}
 
@@ -123,11 +132,33 @@ function App() {
 		);
 	}
 
+	const renderQuestion = () => {
+		if (!question) return;
+		return (
+			<div className='question'>
+				<h3>{question.question}</h3>
+				<div className='options'>{question.options.map((o, i) => renderOption(o, i))}</div>
+			</div>
+
+		);
+	}
+
+	const renderOption = (o, i) => {
+		return (
+			<div key={i} className='option'>
+				<p>{o}</p>
+			</div>
+		);
+	}
+
+
+
 	return (
 		<div className="app">
 			<h1>Welcome to the APP DEMO</h1>
 			{renderCurrentLobby()}
 			{renderJoinLobby()}
+			{renderQuestion()}
 
 		</div>
 	);
