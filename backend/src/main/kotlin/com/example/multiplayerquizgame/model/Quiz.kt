@@ -1,7 +1,7 @@
 package com.example.multiplayerquizgame.model
 
 data class Quiz(
-    val questionList: List<Question> = listOf(),
+    val questionList: MutableList<Question> = mutableListOf(),
     var currentIndex: Int = 0,
 
-)
+    )
