@@ -1,23 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
-
 import { useEffect, useState, useRef, } from 'react';
 
 function App() {
 	const socketRef = useRef(null);
 	const [playerName, setPlayerName] = useState("");
-
-	// attempt connection with web socket on first load
-	useEffect(() => {
-
-	}, [])
+	const [lobby, setLobby] = useState([]);
 
 	// when the player joins the lobby, open connection to websocket
 	const handlePlayerJoin = () => {
 		if (!playerName.trim()) return;
 
 		// attempt connection
-		socketRef.current = new WebSocket('ws://localhost:8080/quiz');
+		if (!socketRef.current) {
+			socketRef.current = new WebSocket('ws://localhost:8080/quiz');
+		}
 
 		// establish connection
 		socketRef.current.onopen = () => {
@@ -43,6 +38,9 @@ function App() {
 		return () => socketRef.current.close();
 	};
 
+
+
+
 	// ie: sendEvent(STRING, STRING)
 	const sendGameEvent = (type, data) => {
 		const gameEvent = {
@@ -57,11 +55,11 @@ function App() {
 		<div className="app">
 			<h1>Welcome to the APP DEMO</h1>
 
-			<h2>Join Game Here</h2>
 
 
 
-			<div className="input-box">
+			<div className="input-box" hidden={socketRef}>
+				<h2>Join Quiz Lobby Here</h2>
 				<textarea
 					className="input"
 					type="text"
