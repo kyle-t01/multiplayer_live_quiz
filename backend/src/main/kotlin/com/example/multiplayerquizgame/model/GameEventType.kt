@@ -5,5 +5,6 @@ enum class GameEventType {
     LOBBY_UPDATE,
     START,
     ANSWER,
+    KICK,
     LEAVE,
 }
