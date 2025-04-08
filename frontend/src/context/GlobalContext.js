@@ -1,11 +1,12 @@
 // store important global variables
 
-import { useContext, createContext, useState } from "react";
+import { useContext, createContext, useState, useRef } from "react";
 
 const GlobalContext = createContext();
 
 export const GlobalContextProvider = ({ children }) => {
 
+    const socketRef = useRef(null);
     const [playerName, setPlayerName] = useState("");
     const [hasJoined, setHasJoined] = useState(false);
     const [lobby, setLobby] = useState([]);
@@ -16,13 +17,13 @@ export const GlobalContextProvider = ({ children }) => {
     return (
         <GlobalContext.Provider
             value={{
+                socketRef,
                 playerName, setPlayerName,
                 hasJoined, setHasJoined,
                 lobby, setLobby,
                 hasGameStarted, setHasGameStarted,
                 question, setQuestion,
                 userAnswer, setUserAnswer,
-
             }}>
             {children}
         </GlobalContext.Provider>

@@ -2,9 +2,11 @@ import { useEffect, useState, useRef, } from 'react';
 import { GlobalVars } from './context/GlobalContext';
 
 function App() {
-	const socketRef = useRef(null);
+	
 	// global variables
-	const { playerName, setPlayerName,
+	const { 
+		socketRef,
+		playerName, setPlayerName,
 		hasJoined, setHasJoined,
 		lobby, setLobby,
 		hasGameStarted, setHasGameStarted,
