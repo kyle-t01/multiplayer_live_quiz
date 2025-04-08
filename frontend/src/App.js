@@ -5,6 +5,7 @@ function App() {
 	const [playerName, setPlayerName] = useState("");
 	const [hasJoined, setHasJoined] = useState(false);
 	const [lobby, setLobby] = useState([]);
+	const [hasGameStarted, setHasGameStarted] = useState(false)
 
 	// when the player joins the lobby, open connection to websocket
 	const handlePlayerJoin = () => {
@@ -38,6 +39,12 @@ function App() {
 				setLobby(message.data)
 				console.log("Updating current lobby!");
 			}
+
+			// check if game has started, and retrieve first question
+			if (message.type == "START") {
+				setHasGameStarted(true)
+				console.log("Starting the game!");
+			}
 		};
 
 		// error
@@ -52,10 +59,12 @@ function App() {
 
 	};
 
+	const handleStartGame = () => {
+		sendGameEvent("START", null);
+	}
 
 
-
-	// ie: sendEvent(STRING, STRING)
+	// ie: sendEvent(STRING, Object)
 	const sendGameEvent = (type, data) => {
 		const gameEvent = {
 			type: type.toUpperCase(),
@@ -70,6 +79,9 @@ function App() {
 			<div className="lobby" hidden={!hasJoined}>
 				<h2>Current Players</h2>
 				{lobby.map((p, i) => renderPlayerCard(p, i))}
+				<button className="button" onClick={handleStartGame} hidden={hasGameStarted}>
+					Start Quiz
+				</button>
 			</div>
 		);
 	}
