@@ -27,6 +27,11 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
         // signal to all players, the updated lobby
         emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, lobby.players.values))
 
+        // if there are no more players, then game has ended
+        if (lobby.players.isEmpty()) {
+            lobby.isGameStarted = false;
+        }
+
     }
 
     // handle game events
@@ -46,7 +51,6 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 if (lobby.isGameStarted) {
                     // then KICK the player
                     emit(session, GameEvent(GameEventType.KICK, player))
-                    lobby.players.remove(session)
                     return
                 }
 
