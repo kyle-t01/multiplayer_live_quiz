@@ -44,15 +44,14 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 val player = Player(name)
                 println("${player.name} JOINED THE LOBBY")
 
-                // associate the session with this player
-                lobby.players[session] = player
-
                 // did this player join when the game already started?
                 if (lobby.isGameStarted) {
                     // then KICK the player
                     emit(session, GameEvent(GameEventType.KICK, player))
                     return
                 }
+                // associate the session with this player
+                lobby.players[session] = player
 
                 // signal to the player, of successful JOIN
                 emit(session,GameEvent(GameEventType.JOIN, player))
