@@ -12,7 +12,7 @@ function App() {
 		if (!playerName.trim()) return;
 
 		// attempt connection
-		if (!socketRef.current) {
+		if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
 			socketRef.current = new WebSocket('ws://localhost:8080/quiz');
 		}
 
@@ -43,7 +43,17 @@ function App() {
 			// check if game has started, and retrieve first question
 			if (message.type == "START") {
 				setHasGameStarted(true)
-				console.log("Starting the game!");
+				console.log("Starting or Joining an existing game!");
+			}
+
+			// check if player has been KICKED
+			if (message.type == "KICK") {
+				setHasGameStarted(true)
+				// check if player has been KICKED
+				console.log("You were KICKED from the game!");
+				alert("A game is already in progress, wait for it to finish before joining!");
+				socketRef.current.close();
+
 			}
 		};
 
