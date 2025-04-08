@@ -27,6 +27,9 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
         val player= lobby.players[session]
         println("$player LEFT the game!")
         lobby.players.remove(session)
+        // update the lobby
+        // signal to all players, the updated lobby
+        emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, lobby.players.values))
 
     }
 
