@@ -41,7 +41,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
         val data = json.get("data").asText()
 
         // print game events sent by players to terminal
-        println("$type: $data")
+        // println("$type: $data")
 
         when (GameEventType.valueOf(type.uppercase())) {
             GameEventType.JOIN -> {
@@ -77,6 +77,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
 
                 // load the quiz questions and get the first question
                 val q = lobby.quiz.loadQuiz()
+                println("Current question: ${q.question}")
 
                 // signal to all players, that the Game has Started, and the first question!
                 emitToAll(GameEvent(GameEventType.START, q))
