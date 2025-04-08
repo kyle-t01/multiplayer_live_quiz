@@ -38,8 +38,17 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 val name = json.get("data").asText()
                 val player = Player(name)
                 println("${player.name} JOINED THE LOBBY")
+
                 // associate the session with this player
                 lobby.players[session] = player
+
+                // did this player join when the game already started?
+                if (lobby.isGameStarted) {
+                    // then KICK the player
+                    emit(session, GameEvent(GameEventType.KICK, player))
+                    lobby.players.remove(session)
+                    return
+                }
 
                 // signal to the player, of successful JOIN
                 emit(session,GameEvent(GameEventType.JOIN, player))
@@ -52,9 +61,11 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
 
                 if (lobby.isGameStarted) {
                     // game already started
+                    println("Game has already started!")
                     return
                 }
                 // start the game
+                println("Game has started!")
                 lobby.isGameStarted = true
 
                 // load the quiz questions and get the first question
@@ -73,6 +84,9 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
             }
             GameEventType.LOBBY_UPDATE -> {
                 println("Unexpected Usage! - Client shouldn't need to ask for lobby updates!")
+            }
+            GameEventType.KICK -> {
+                println("Unexpected Usage! - KICK is not implemented!")
             }
         }
     }
