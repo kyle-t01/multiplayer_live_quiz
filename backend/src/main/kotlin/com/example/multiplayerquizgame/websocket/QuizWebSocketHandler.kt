@@ -25,7 +25,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         val player= lobby.players[session]
-        println("${player} LEFT the game!")
+        println("$player LEFT the game!")
         lobby.players.remove(session)
 
     }
@@ -42,9 +42,9 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 val playerList = lobby.players.values
                 println("${player.name} JOINED THE LOBBY")
                 // signal to the player
-                emit(session,GameEvent(GameEventType.JOIN, ""))
+                emit(session,GameEvent(GameEventType.JOIN, player.name))
                 // signal to all players, the updated lobby
-                emitToAll(GameEvent(GameEventType.JOIN, playerList.toString()))
+                emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, playerList.toString()))
             }
             GameEventType.ANSWER -> {
                 val ans = json.get("data").asText()
@@ -53,6 +53,9 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
             GameEventType.LEAVE -> {
                 println("YOU LEFT THE GAME")
                 // disconnect
+            }
+            GameEventType.LOBBY_UPDATE -> {
+                println("GameEventType: lobby update")
             }
         }
     }
