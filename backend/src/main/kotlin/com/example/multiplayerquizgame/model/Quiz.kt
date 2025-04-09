@@ -80,7 +80,7 @@ data class Quiz(
 
     // have we finished all questions in the quiz
     fun isFinished():Boolean {
-        return (currentIndex > questionList.size)
+        return (currentIndex >= questionList.size)
     }
 
     // get next question
