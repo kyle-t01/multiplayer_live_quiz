@@ -28,16 +28,16 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         val json = mapper.readTree(message.payload)
         // json = { type: "", data: {} }
-        val type = json.get("type").asText()
+        val typeStr:String = json.get("type").asText().uppercase()
+        val type = GameEventType.valueOf(typeStr)
         val data = json.get("data").asText()
 
         // print game events sent by players to terminal
         // println("$type: $data")
 
-        when (GameEventType.valueOf(type.uppercase())) {
+        when (type) {
             GameEventType.JOIN -> {
-                val name = json.get("data").asText()
-                val player = Player(name)
+                val player = Player(data)
                 lobby.addToPlayers(session, player)
                 // did this player join when the game already started?
                 if (lobby.isGameStarted) {
@@ -67,7 +67,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
             }
             GameEventType.ANSWER -> {
                 // extract message
-                val ans:Int = json.get("data").asText().toInt()
+                val ans:Int = data.toInt()
                 val player = lobby.players[session]
 
 
