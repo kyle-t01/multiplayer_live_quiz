@@ -61,6 +61,9 @@ function App() {
 			// check if game has ended
 			if (message.type == "END") {
 				setHasGameStarted(false);
+				setUserAnswer(null);
+				setIsShowAnswer(false)
+				setQuestion(null)
 				console.log("Game has ended!");
 			}
 
