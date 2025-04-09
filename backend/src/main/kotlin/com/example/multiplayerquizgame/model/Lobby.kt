@@ -14,7 +14,7 @@ class Lobby(
     // remove a <session, player> from lobby on disconnect
     fun removePlayer(session: WebSocketSession) {
         val player= players[session]
-        println("$player LEFT the game! [${players.size} players left...]")
+        println("$player LEFT the game! [${players.size -1} players left...]")
         players.remove(session)
 
         // if there are no more players, then the game has ended
@@ -33,6 +33,7 @@ class Lobby(
     fun addToPlayers(session: WebSocketSession, player: Player) {
         // associate the session with this player
         players[session] = player
+        println("$player JOINED the game! [${players.size} players]")
         return
     }
 
