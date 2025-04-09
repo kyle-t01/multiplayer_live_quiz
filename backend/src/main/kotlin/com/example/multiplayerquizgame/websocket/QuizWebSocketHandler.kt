@@ -75,40 +75,40 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 emitToAllLobbyUpdate()
 
                 gameLoopJob = gameLoopScope.launch {
-                    println("Launched A Coroutine: $gameLoopJob")
+                    println("Launched Coroutine")
                     val answeringDuration:Long = 5000 // each Q has a 10s timer (that may be varied in the future)
                     val revealAnswerDuration:Long = 3000 // reveal answers for 5s before moving on
-                    // tell all players game has started!
-                    emitToAll(GameEvent(GameEventType.START, ""))
-                    // while we have questions
-                    while(!lobby.quiz.isFinished()) {
 
-                        if (lobby.players.isEmpty()) {
-                            // if no players, exit co-routine
-                            break
+                    try {
+                        // tell all players game has started!
+                        emitToAll(GameEvent(GameEventType.START, ""))
+                        // while we have questions
+                        while (!lobby.quiz.isFinished()) {
+
+                            if (lobby.players.isEmpty()) {
+                                // if no players, exit co-routine
+                                return@launch
+                            }
+                            // get current question
+                            val q = lobby.quiz.getCurrentQ()
+                            // send it to all players
+                            emitToAll(GameEvent(GameEventType.QUESTION, q))
+                            // give time to players to answer questions
+                            delay(answeringDuration)
+                            // reveal answer to all players
+                            emitToAll(GameEvent(GameEventType.SHOW, q.answers))
+                            // give time to players to view answers
+                            delay(revealAnswerDuration)
+                            // increment the current question index
+                            lobby.quiz.currentIndex += 1
                         }
-                        // get current question
-                        val q = lobby.quiz.getCurrentQ()
-                        // send it to all players
-                        emitToAll(GameEvent(GameEventType.QUESTION, q))
-                        // give time to players to answer questions
-                        delay(answeringDuration)
-                        // reveal answer to all players
-                        emitToAll(GameEvent(GameEventType.SHOW, q.answers))
-                        // give time to players to view answers
-                        delay(revealAnswerDuration)
-                        // increment the current question index
-                        lobby.quiz.currentIndex +=1
+                    } finally {
+                        // any time co-routine exits (or when gameLoop needs to end)
+                        println("Exiting Coroutine")
+                        lobby.endGame()
+                        gameLoopJob = null
+                        emitToAll(GameEvent(GameEventType.END, ""))
                     }
-                    // game has finished here
-                    lobby.endGame()
-                    // dont kick everyone
-                    // emitToAll(GameEvent(GameEventType.KICK, ""))
-
-                    println("Exiting Coroutine...: $gameLoopJob")
-                    gameLoopJob = null
-                    // the GAME finishing asking all questions
-                    emitToAll(GameEvent(GameEventType.END, ""))
                 }
             }
             GameEventType.ANSWER -> {
