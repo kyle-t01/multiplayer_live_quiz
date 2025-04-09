@@ -4,6 +4,7 @@ package com.example.multiplayerquizgame.websocket
 import com.example.multiplayerquizgame.model.*
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import kotlinx.coroutines.*
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
@@ -11,8 +12,8 @@ import org.springframework.web.socket.WebSocketSession
 import org.springframework.web.socket.config.annotation.EnableWebSocket
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
-
 import org.springframework.web.socket.handler.TextWebSocketHandler
+
 
 class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
     // allow conversion of Kotlin objects <-> JSON,
@@ -25,6 +26,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
     }
 
     // handle game events
+    @OptIn(DelicateCoroutinesApi::class)
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         val json = mapper.readTree(message.payload)
         // json = { type: "", data: {} }
@@ -43,7 +45,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 if (lobby.isGameStarted) {
                     // then KICK the player
                     println("Kicking ${player.name} from game.")
-                    emit(session, GameEvent(GameEventType.KICK, player))
+                    emit(session, GameEvent(GameEventType.KICK, ""))
                     return
                 }
                 // signal to the player, of successful JOIN
@@ -57,12 +59,40 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                     return
                 }
                 lobby.startGame()
-               // get the first question
-                val q = lobby.quiz.getCurrentQ()
-                println("Current question: ${q.question}")
 
-                // signal to all players, that the Game has Started, and the first question!
-                emitToAll(GameEvent(GameEventType.START, q))
+                // start a coroutine for game loop
+               GlobalScope.launch {
+                    val answeringDuration:Long = 5000 // each Q has a 10s timer (that may be varied in the future)
+                    val revealAnswerDuration:Long = 3000 // reveal answers for 5s before moving on
+                    // tell all players game has started!
+                    emitToAll(GameEvent(GameEventType.START, ""))
+                    // while we have questions
+                    while(!lobby.quiz.isFinished()) {
+
+                        if (lobby.players.isEmpty()) {
+                            // if no players, exit co-routine and kick everyone
+                            lobby.endGame()
+                            emitToAll(GameEvent(GameEventType.KICK, ""))
+                            return@launch
+                        }
+                        // get current question
+                        val q = lobby.quiz.getCurrentQ()
+                        // send it to all players
+                        emitToAll(GameEvent(GameEventType.QUESTION, q))
+                        // give time to players to answer questions
+                        delay(answeringDuration)
+                        // reveal answer to all players
+                        emitToAll(GameEvent(GameEventType.SHOW, q.answers))
+                        // give time to players to view answers
+                        delay(revealAnswerDuration)
+                        // increment the current question index
+                        lobby.quiz.currentIndex +=1
+                    }
+                    // game has finished here
+                    lobby.isGameStarted = false
+                }
+
+
             }
             GameEventType.ANSWER -> {
                 // extract message
@@ -78,14 +108,8 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 emitToAllLobbyUpdate()
 
             }
-            GameEventType.LEAVE -> {
-                println("Unexpected Usage! - The only way to leave a lobby is to close the page!")
-            }
-            GameEventType.LOBBY_UPDATE -> {
-                println("Unexpected Usage! - Client shouldn't need to ask for lobby updates!")
-            }
-            GameEventType.KICK -> {
-                println("Unexpected Usage! - KICK is not implemented!")
+            else -> {
+                println("Unexpected Usage of $type !")
             }
         }
     }
