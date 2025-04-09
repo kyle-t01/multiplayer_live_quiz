@@ -20,23 +20,14 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
 
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        val player= lobby.players[session]
-        println("$player LEFT the game!")
-        lobby.players.remove(session)
-        // update the lobby
-        // signal to all players, the updated lobby
-        emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, lobby.players.values))
-
-        // if there are no more players, then game has ended
-        if (lobby.players.isEmpty()) {
-            lobby.isGameStarted = false;
-        }
-
+        lobby.removePlayer(session)
+        emitToAllLobbyUpdate()
     }
 
     // handle game events
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
         val json = mapper.readTree(message.payload)
+        // json = { type: "", data: {} }
         val type = json.get("type").asText()
         val data = json.get("data").asText()
 
@@ -47,8 +38,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
             GameEventType.JOIN -> {
                 val name = json.get("data").asText()
                 val player = Player(name)
-                // associate the session with this player
-                lobby.players[session] = player
+                lobby.addToPlayers(session, player)
                 // did this player join when the game already started?
                 if (lobby.isGameStarted) {
                     // then KICK the player
@@ -56,24 +46,17 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                     emit(session, GameEvent(GameEventType.KICK, player))
                     return
                 }
-
-
                 // signal to the player, of successful JOIN
                 emit(session,GameEvent(GameEventType.JOIN, player))
-
-                // signal to all players, the updated lobby
-                val playerList = lobby.players.values
-                emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, playerList))
+                // update the lobby of all players
+                emitToAllLobbyUpdate()
             }
             GameEventType.START -> {
-
                 if (lobby.isGameStarted) {
                     // game already started
                     return
                 }
-                // start the game
-                println("Game has officially started.")
-                lobby.isGameStarted = true
+                lobby.startGame()
 
                 // load the quiz questions and get the first question
                 val q = lobby.quiz.loadQuiz()
@@ -99,7 +82,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 emit(session, GameEvent(GameEventType.ANSWER, lobby.quiz.getCurrentA()))
 
                 // broadcast state change to everyone
-                emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, lobby.players.values))
+                emitToAllLobbyUpdate()
 
             }
             GameEventType.LEAVE -> {
@@ -124,6 +107,11 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
         for (s in lobby.players.keys) {
             emit(s, event)
         }
+    }
+
+    // helper signal to perform a lobby update
+    private fun emitToAllLobbyUpdate() {
+        emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, lobby.getPlayers()))
     }
 
 }
