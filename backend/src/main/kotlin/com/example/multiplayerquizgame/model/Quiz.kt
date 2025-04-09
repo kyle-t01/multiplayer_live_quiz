@@ -93,7 +93,9 @@ data class Quiz(
 
     // get current question, isFinished() must be called beforehand
     fun getCurrentQ():Question {
-        return questionList[currentIndex]
+        val q = questionList[currentIndex]
+        println("Current question: ${q.question}")
+        return q
     }
 
     // get current answer(s), isFinished() must be called beforehand
