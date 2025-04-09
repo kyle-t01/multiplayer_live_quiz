@@ -45,6 +45,14 @@ class Lobby(
         quiz.loadQuiz()
     }
 
+    // end the game
+    fun endGame() {
+        println("Game has been terminated.")
+        isGameStarted = false
+        // reset Quiz
+        quiz.endQuiz()
+    }
+
     // validate a player's answer
     fun validateAnswer(session: WebSocketSession, ans: Int) {
         val player = players[session]

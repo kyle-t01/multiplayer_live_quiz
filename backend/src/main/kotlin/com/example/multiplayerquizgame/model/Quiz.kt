@@ -72,6 +72,12 @@ data class Quiz(
         return questionList[0]
     }
 
+    // end Quiz, reset to default state
+    fun endQuiz(){
+        questionList.clear()
+        currentIndex = 0
+    }
+
     // have we finished all questions in the quiz
     fun isFinished():Boolean {
         return (currentIndex > questionList.size)
