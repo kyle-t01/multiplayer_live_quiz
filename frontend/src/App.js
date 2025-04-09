@@ -50,11 +50,16 @@ function App() {
 				console.log("Updating current lobby!");
 			}
 
-			// check if game has started, and retrieve first question
+			// check if game has started
 			if (message.type == "START") {
 				setHasGameStarted(true);
-				setQuestion(message.data);
 				console.log("Starting or Joining an existing game!");
+			}
+
+			// check if game has sent a question
+			if (message.type == "QUESTION") {
+				setQuestion(message.data);
+				console.log("GOT A QUESTION");
 			}
 
 			// check if player has been KICKED
@@ -70,12 +75,6 @@ function App() {
 			// check if player answer has been received
 			if (message.type == "ANSWER") {
 				console.log("Your answer was received!");
-				const answers = message.data;
-				// set results
-
-				//
-
-
 			}
 		};
 
