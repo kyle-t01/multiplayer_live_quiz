@@ -57,9 +57,8 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                     return
                 }
                 lobby.startGame()
-
-                // load the quiz questions and get the first question
-                val q = lobby.quiz.loadQuiz()
+               // get the first question
+                val q = lobby.quiz.getCurrentQ()
                 println("Current question: ${q.question}")
 
                 // signal to all players, that the Game has Started, and the first question!
@@ -68,16 +67,10 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
             GameEventType.ANSWER -> {
                 // extract message
                 val ans:Int = data.toInt()
-                val player = lobby.players[session]
 
+                // validate answer
+                lobby.validateAnswer(session, ans)
 
-                // see if answer was correct, and do something with player score
-                if (lobby.quiz.getCurrentA().contains(ans)) {
-                    println("$player has answered $ans [V] correct")
-                    player!!.qCorrect += 1
-                } else {
-                    println("$player has answered $ans [X] incorrect")
-                }
                 // tell player the actual correct answer(s)
                 emit(session, GameEvent(GameEventType.ANSWER, lobby.quiz.getCurrentA()))
 
