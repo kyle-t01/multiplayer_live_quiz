@@ -13,6 +13,7 @@ export const GlobalContextProvider = ({ children }) => {
     const [hasGameStarted, setHasGameStarted] = useState(false);
     const [question, setQuestion] = useState(null);
     const [userAnswer, setUserAnswer] = useState(null);
+    const [isShowAnswer, setIsShowAnswer] = useState(false);
 
     return (
         <GlobalContext.Provider
@@ -24,6 +25,7 @@ export const GlobalContextProvider = ({ children }) => {
                 hasGameStarted, setHasGameStarted,
                 question, setQuestion,
                 userAnswer, setUserAnswer,
+                isShowAnswer, setIsShowAnswer
             }}>
             {children}
         </GlobalContext.Provider>

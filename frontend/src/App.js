@@ -11,7 +11,9 @@ function App() {
 		lobby, setLobby,
 		hasGameStarted, setHasGameStarted,
 		question, setQuestion,
-		userAnswer, setUserAnswer } = GlobalVars();
+		userAnswer, setUserAnswer,
+		isShowAnswer, setIsShowAnswer
+	} = GlobalVars();
 
 	// when the player joins the lobby, open connection to websocket
 	const handlePlayerJoin = () => {
@@ -46,7 +48,7 @@ function App() {
 
 			// check if there was a lobby update
 			if (message.type == "LOBBY_UPDATE") {
-				setLobby(message.data)
+				setLobby(message.data);
 				console.log("Updating current lobby!");
 			}
 
@@ -62,9 +64,15 @@ function App() {
 				console.log("GOT A QUESTION");
 			}
 
+			// check if game has want to show the current answer
+			if (message.type == "SHOW") {
+				setIsShowAnswer(true);
+				console.log("GOT A QUESTION");
+			}
+
 			// check if player has been KICKED
 			if (message.type == "KICK") {
-				setHasGameStarted(true)
+				setHasGameStarted(true);
 				// check if player has been KICKED
 				console.log("You were KICKED from the game!");
 				alert("A game is already in progress, wait for it to finish before joining!");
