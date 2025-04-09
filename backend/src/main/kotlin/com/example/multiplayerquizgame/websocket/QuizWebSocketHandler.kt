@@ -71,10 +71,11 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                     return
                 }
                 lobby.startGame()
-                println("Game Start: $gameLoopJob")
-                // start a coroutine for game loop
+                // update the initial score of all players
+                emitToAllLobbyUpdate()
+
                 gameLoopJob = gameLoopScope.launch {
-                    println("Entering active state: $gameLoopJob")
+                    println("Launched A Coroutine: $gameLoopJob")
                     val answeringDuration:Long = 5000 // each Q has a 10s timer (that may be varied in the future)
                     val revealAnswerDuration:Long = 3000 // reveal answers for 5s before moving on
                     // tell all players game has started!
@@ -104,7 +105,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                     // dont kick everyone
                     // emitToAll(GameEvent(GameEventType.KICK, ""))
 
-                    println("Finishing: $gameLoopJob")
+                    println("Exiting Coroutine...: $gameLoopJob")
                     gameLoopJob = null
                     // the GAME finishing asking all questions
                     emitToAll(GameEvent(GameEventType.END, ""))
