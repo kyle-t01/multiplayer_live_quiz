@@ -165,6 +165,10 @@ function App() {
 	}
 
 	const handleUserAnswer = (i) => {
+		if (userAnswer != null) {
+			// you already answered!
+			return;
+		}
 		setUserAnswer(i);
 		console.log("You selected: ", i);
 		sendGameEvent("ANSWER", i);
