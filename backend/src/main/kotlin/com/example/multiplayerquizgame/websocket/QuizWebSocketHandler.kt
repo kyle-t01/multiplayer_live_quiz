@@ -103,8 +103,11 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                     lobby.endGame()
                     // dont kick everyone
                     // emitToAll(GameEvent(GameEventType.KICK, ""))
+
                     println("Finishing: $gameLoopJob")
                     gameLoopJob = null
+                    // the GAME finishing asking all questions
+                    emitToAll(GameEvent(GameEventType.END, ""))
                 }
             }
             GameEventType.ANSWER -> {

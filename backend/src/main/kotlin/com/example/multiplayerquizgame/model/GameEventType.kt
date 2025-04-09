@@ -4,6 +4,7 @@ enum class GameEventType {
     JOIN, // player attempted to join a game
     LOBBY_UPDATE, // update lobby information
     START, // game has started
+    END, // game has ended
     ANSWER, // player has answered
     QUESTION, // send question to players
     SHOW, // reveal answers
