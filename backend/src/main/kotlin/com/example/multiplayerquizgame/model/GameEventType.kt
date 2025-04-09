@@ -1,10 +1,12 @@
 package com.example.multiplayerquizgame.model
 
 enum class GameEventType {
-    JOIN,
-    LOBBY_UPDATE,
-    START,
-    ANSWER,
-    KICK,
-    LEAVE,
+    JOIN, // player attempted to join a game
+    LOBBY_UPDATE, // update lobby information
+    START, // game has started
+    ANSWER, // player has answered
+    QUESTION, // send question to players
+    SHOW, // reveal answers
+    KICK, // kick player out of lobby
+    LEAVE, // player left
 }
