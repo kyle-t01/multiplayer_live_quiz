@@ -60,14 +60,16 @@ function App() {
 
 			// check if game has sent a question
 			if (message.type == "QUESTION") {
+				setIsShowAnswer(false);
 				setQuestion(message.data);
+				setUserAnswer(null);
 				console.log("GOT A QUESTION");
 			}
 
 			// check if game has want to show the current answer
 			if (message.type == "SHOW") {
 				setIsShowAnswer(true);
-				console.log("GOT A QUESTION");
+				console.log("SHOWING CURRENT ANSWERS");
 			}
 
 			// check if player has been KICKED
