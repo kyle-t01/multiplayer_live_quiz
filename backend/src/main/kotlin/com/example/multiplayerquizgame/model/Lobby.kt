@@ -40,9 +40,12 @@ class Lobby(
     fun startGame() {
         println("Game has officially started.")
         isGameStarted = true
-
         // load Quiz
         quiz.loadQuiz()
+        // reset the scores of every player
+        for (p in getPlayers()) {
+            p.resetScore()
+        }
     }
 
     // end the game
