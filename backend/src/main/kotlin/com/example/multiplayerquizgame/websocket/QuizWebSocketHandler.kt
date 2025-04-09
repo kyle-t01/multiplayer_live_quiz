@@ -18,11 +18,23 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
     // allow conversion of Kotlin objects <-> JSON,
     private val mapper = jacksonObjectMapper()
+    /* TODO: could benefit from moving coroutine logic to GameController */
+    // scope to hold coroutines
+    private val gameLoopScope = CoroutineScope(CoroutineName("GameLoopScope"))
+
+    // track gameLoop coroutine
+    private var gameLoopJob: Job? = null
 
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
         lobby.removePlayer(session)
         emitToAllLobbyUpdate()
+
+        // when all players have disconnected, stop the gameLoopJob
+        if (lobby.players.isEmpty()) {
+            gameLoopJob?.cancel()
+            gameLoopJob = null
+        }
     }
 
     // handle game events
@@ -42,7 +54,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 val player = Player(data)
                 lobby.addToPlayers(session, player)
                 // did this player join when the game already started?
-                if (lobby.isGameStarted) {
+                if (lobby.isGameStarted || gameLoopJob?.isActive == true) {
                     // then KICK the player
                     println("Kicking ${player.name} from game.")
                     emit(session, GameEvent(GameEventType.KICK, ""))
@@ -54,14 +66,15 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                 emitToAllLobbyUpdate()
             }
             GameEventType.START -> {
-                if (lobby.isGameStarted) {
+                if (lobby.isGameStarted || gameLoopJob?.isActive == true) {
                     // game already started
                     return
                 }
                 lobby.startGame()
-
+                println("Game Start: $gameLoopJob")
                 // start a coroutine for game loop
-               GlobalScope.launch {
+                gameLoopJob = gameLoopScope.launch {
+                    println("Entering active state: $gameLoopJob")
                     val answeringDuration:Long = 5000 // each Q has a 10s timer (that may be varied in the future)
                     val revealAnswerDuration:Long = 3000 // reveal answers for 5s before moving on
                     // tell all players game has started!
@@ -70,10 +83,8 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                     while(!lobby.quiz.isFinished()) {
 
                         if (lobby.players.isEmpty()) {
-                            // if no players, exit co-routine and kick everyone
-                            lobby.endGame()
-                            emitToAll(GameEvent(GameEventType.KICK, ""))
-                            return@launch
+                            // if no players, exit co-routine
+                            break
                         }
                         // get current question
                         val q = lobby.quiz.getCurrentQ()
@@ -89,30 +100,29 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                         lobby.quiz.currentIndex +=1
                     }
                     // game has finished here
-                    lobby.isGameStarted = false
+                    lobby.endGame()
+                    // dont kick everyone
+                    // emitToAll(GameEvent(GameEventType.KICK, ""))
+                    println("Finishing: $gameLoopJob")
+                    gameLoopJob = null
                 }
-
-
             }
             GameEventType.ANSWER -> {
                 // extract message
                 val ans:Int = data.toInt()
-
                 // validate answer
                 lobby.validateAnswer(session, ans)
-
                 // tell player the actual correct answer(s)
                 emit(session, GameEvent(GameEventType.ANSWER, lobby.quiz.getCurrentA()))
-
                 // broadcast state change to everyone
                 emitToAllLobbyUpdate()
-
             }
             else -> {
                 println("Unexpected Usage of $type !")
             }
         }
     }
+
     // emit signal to player
     private fun emit(session: WebSocketSession, event: GameEvent) {
         val json = mapper.writeValueAsString(event)
