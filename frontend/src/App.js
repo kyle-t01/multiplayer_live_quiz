@@ -58,6 +58,12 @@ function App() {
 				console.log("Starting or Joining an existing game!");
 			}
 
+			// check if game has ended
+			if (message.type == "END") {
+				setHasGameStarted(false);
+				console.log("Game has ended!");
+			}
+
 			// check if game has sent a question
 			if (message.type == "QUESTION") {
 				setIsShowAnswer(false);
@@ -74,7 +80,7 @@ function App() {
 
 			// check if player has been KICKED
 			if (message.type == "KICK") {
-				setHasGameStarted(true);
+				setHasGameStarted(false);
 				// check if player has been KICKED
 				console.log("You were KICKED from the game!");
 				alert("A game is already in progress, wait for it to finish before joining!");
