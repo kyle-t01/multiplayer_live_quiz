@@ -40,6 +40,23 @@ class Lobby(
     fun startGame() {
         println("Game has officially started.")
         isGameStarted = true
+
+        // load Quiz
+        quiz.loadQuiz()
+    }
+
+    // validate a player's answer
+    fun validateAnswer(session: WebSocketSession, ans: Int) {
+        val player = players[session]
+
+        // change player score based on answer
+        if (quiz.getCurrentA().contains(ans)) {
+            println("$player has answered $ans [V] correct")
+            player!!.qCorrect += 1
+        } else {
+            println("$player has answered $ans [X] incorrect")
+        }
+
     }
 
 }
