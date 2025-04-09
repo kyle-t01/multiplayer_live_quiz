@@ -2,9 +2,9 @@ import { useEffect, useState, useRef, } from 'react';
 import { GlobalVars } from './context/GlobalContext';
 
 function App() {
-	
+
 	// global variables
-	const { 
+	const {
 		socketRef,
 		playerName, setPlayerName,
 		hasJoined, setHasJoined,
@@ -66,6 +66,17 @@ function App() {
 				socketRef.current.close();
 
 			}
+
+			// check if player answer has been received
+			if (message.type == "ANSWER") {
+				console.log("Your answer was received!");
+				const answers = message.data;
+				// set results
+
+				//
+
+
+			}
 		};
 
 		// error
@@ -81,7 +92,7 @@ function App() {
 	};
 
 	const handleStartGame = () => {
-		sendGameEvent("START", null);
+		sendGameEvent("START", "");
 	}
 
 
@@ -147,12 +158,17 @@ function App() {
 
 	const renderOption = (o, i) => {
 		return (
-			<div key={i} className='option'>
+			<div key={i} className='option' onClick={() => handleUserAnswer(i)}>
 				<p>{o}</p>
 			</div>
 		);
 	}
 
+	const handleUserAnswer = (i) => {
+		setUserAnswer(i);
+		console.log("You selected: ", i);
+		sendGameEvent("ANSWER", i);
+	}
 
 
 	return (
