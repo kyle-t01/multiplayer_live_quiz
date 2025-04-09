@@ -175,8 +175,11 @@ function App() {
 	}
 
 	const renderOption = (o, i) => {
+		// render selected user
+		const isSelectedAnswer = (i == userAnswer)
+		const optionClassName = (isSelectedAnswer) ? "selected-option" : "option";
 		return (
-			<div key={i} className='option' onClick={() => handleUserAnswer(i)}>
+			<div key={i} className={optionClassName} onClick={() => handleUserAnswer(i)}>
 				<p>{o}</p>
 			</div>
 		);
