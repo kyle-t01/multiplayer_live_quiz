@@ -15,6 +15,16 @@ export const GlobalContextProvider = ({ children }) => {
     const [userAnswer, setUserAnswer] = useState(null);
     const [isShowAnswer, setIsShowAnswer] = useState(false);
 
+    // ie: sendEvent(STRING, Object)
+    const sendGameEvent = (type, data) => {
+        const gameEvent = {
+            type: type.toUpperCase(),
+            data: data,
+        };
+        socketRef.current.send(JSON.stringify(gameEvent));
+        console.log(`sent a game event: ${type}: ${data}`);
+    }
+
     return (
         <GlobalContext.Provider
             value={{
@@ -25,7 +35,8 @@ export const GlobalContextProvider = ({ children }) => {
                 hasGameStarted, setHasGameStarted,
                 question, setQuestion,
                 userAnswer, setUserAnswer,
-                isShowAnswer, setIsShowAnswer
+                isShowAnswer, setIsShowAnswer,
+                sendGameEvent,
             }}>
             {children}
         </GlobalContext.Provider>
