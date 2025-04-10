@@ -27,6 +27,16 @@ export const GlobalContextProvider = ({ children }) => {
     const handleStartGame = () => {
         sendGameEvent("START", "");
     }
+    const handleUserAnswer = (i) => {
+        if (userAnswer != null || isShowAnswer) {
+            // user already answered, or answer already revealed
+            return;
+        }
+        setUserAnswer(i);
+        console.log("You selected: ", i);
+        sendGameEvent("ANSWER", i);
+    }
+
     // when the player joins the lobby, open connection to websocket
     const handlePlayerJoin = () => {
         if (!playerName.trim()) return;
@@ -123,6 +133,7 @@ export const GlobalContextProvider = ({ children }) => {
                 sendGameEvent,
                 handleStartGame,
                 handlePlayerJoin,
+                handleUserAnswer,
             }}>
             {children}
         </GlobalContext.Provider>
