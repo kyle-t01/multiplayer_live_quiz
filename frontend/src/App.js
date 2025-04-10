@@ -36,67 +36,8 @@ function App() {
 		};
 
 		// receive message
-		socketRef.current.onmessage = (event) => {
-			const message = JSON.parse(event.data);
-			console.log("server sent msg:");
-			console.log(message);
-
-			// check if player was added to the lobby
-			if (message.type == "JOIN") {
-				setHasJoined(true);
-				console.log("You have joined the lobby!");
-			}
-
-			// check if there was a lobby update
-			if (message.type == "LOBBY_UPDATE") {
-				setLobby(message.data);
-				console.log("Updating current lobby!");
-			}
-
-			// check if game has started
-			if (message.type == "START") {
-				setHasGameStarted(true);
-				console.log("Starting or Joining an existing game!");
-			}
-
-			// check if game has ended
-			if (message.type == "END") {
-				setHasGameStarted(false);
-				setUserAnswer(null);
-				setIsShowAnswer(false)
-				setQuestion(null)
-				console.log("Game has ended!");
-			}
-
-			// check if game has sent a question
-			if (message.type == "QUESTION") {
-				setIsShowAnswer(false);
-				setQuestion(message.data);
-				setUserAnswer(null);
-				console.log("GOT A QUESTION");
-			}
-
-			// check if game has want to show the current answer
-			if (message.type == "SHOW") {
-				setIsShowAnswer(true);
-				console.log("SHOWING CURRENT ANSWERS");
-			}
-
-			// check if player has been KICKED
-			if (message.type == "KICK") {
-				setHasGameStarted(false);
-				setHasJoined(false)
-				// check if player has been KICKED
-				console.log("You were KICKED from the game!");
-				alert("A game is already in progress, wait for it to finish before joining!");
-				socketRef.current.close();
-
-			}
-
-			// check if player answer has been received
-			if (message.type == "ANSWER") {
-				console.log("Your answer was received!");
-			}
+		socketRef.current.onmessage = (message) => {
+			handleGameEventMessage(message);
 		};
 
 		// error
@@ -110,6 +51,58 @@ function App() {
 		};
 
 	};
+	// messages sent from the game server
+	const handleGameEventMessage = (message) => {
+		const gameEvent = JSON.parse(message.data);
+		console.log("server sent GameEvent:");
+		console.log(gameEvent);
+		switch (gameEvent.type) {
+			case "JOIN":
+				setHasJoined(true);
+				console.log("You have joined the lobby!");
+				break;
+			case "LOBBY_UPDATE":
+				setLobby(gameEvent.data);
+				console.log("Updating current lobby!");
+				break;
+			case "START":
+				setHasGameStarted(true);
+				console.log("Starting or Joining an existing game!");
+				break;
+			case "END":
+				setHasGameStarted(false);
+				setUserAnswer(null);
+				setIsShowAnswer(false)
+				setQuestion(null)
+				console.log("Game has ended!");
+				break;
+			case "QUESTION":
+				setIsShowAnswer(false);
+				setQuestion(gameEvent.data);
+				setUserAnswer(null);
+				console.log("GOT A QUESTION");
+				break;
+			case "SHOW":
+				setIsShowAnswer(true);
+				console.log("SHOWING CURRENT ANSWERS");
+				break;
+			case "KICK":
+				setHasGameStarted(false);
+				setHasJoined(false)
+				// check if player has been KICKED
+				console.log("You were KICKED from the game!");
+				alert("A game is already in progress, wait for it to finish before joining!");
+				socketRef.current.close();
+				break;
+			case "ANSWER":
+				console.log("Your answer was received!");
+				break;
+			default:
+				alert("UNKNOWN IMPLEMENTATION of", gameEvent);
+		}
+	}
+
+
 
 	const handleStartGame = () => {
 		sendGameEvent("START", "");
