@@ -65,9 +65,9 @@ code {
 
   text-align: center;
 
-  word-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
-  white-space: normal;
 }
 
 .player-card p {
@@ -82,9 +82,9 @@ code {
 
   text-align: center;
 
-  word-wrap: nowrap;
+  white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
-  white-space: normal;
 }
 
 .self-player-card p {
