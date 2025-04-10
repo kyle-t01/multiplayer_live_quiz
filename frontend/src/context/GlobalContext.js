@@ -24,8 +24,9 @@ export const GlobalContextProvider = ({ children }) => {
         socketRef.current.send(JSON.stringify(gameEvent));
         console.log(`sent a game event: ${type}: ${data}`);
     }
-
-
+    const handleStartGame = () => {
+        sendGameEvent("START", "");
+    }
     // when the player joins the lobby, open connection to websocket
     const handlePlayerJoin = () => {
         if (!playerName.trim()) return;
@@ -120,6 +121,7 @@ export const GlobalContextProvider = ({ children }) => {
                 userAnswer, setUserAnswer,
                 isShowAnswer, setIsShowAnswer,
                 sendGameEvent,
+                handleStartGame,
                 handlePlayerJoin,
             }}>
             {children}

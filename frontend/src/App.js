@@ -1,63 +1,17 @@
 import { useEffect, useState, useRef, } from 'react';
 import { GlobalVars } from './context/GlobalContext';
 import InputBox from './components/InputBox';
+import Lobby from './components/Lobby';
 
 function App() {
 
 	// global variables
 	const {
-		socketRef,
-		playerName, setPlayerName,
-		hasJoined, setHasJoined,
-		lobby, setLobby,
-		hasGameStarted, setHasGameStarted,
-		question, setQuestion,
+		question, 
 		userAnswer, setUserAnswer,
-		isShowAnswer, setIsShowAnswer,
+		isShowAnswer, 
 		sendGameEvent,
-		handlePlayerJoin,
 	} = GlobalVars();
-
-
-	const handleStartGame = () => {
-		sendGameEvent("START", "");
-	}
-
-
-
-	const renderCurrentLobby = () => {
-		if (!hasJoined) return;
-		return (
-			<div>
-				<h2>Active Players</h2>
-				<div className="lobby">
-					{lobby.map((p, i) => renderPlayerCard(p, i))}
-				</div>
-
-				<button className="button" onClick={handleStartGame} hidden={hasGameStarted}>
-					Start Quiz
-				</button>
-			</div>
-		);
-	}
-
-	const renderPlayerCard = (p, i) => {
-		if (playerName == p.name) {
-			// render the current player's player-card
-			return (
-				<div className='self-player-card' key={i}>
-					<p>{p.name}</p>
-					<p>{p.qcorrect}</p>
-				</div>
-			);
-		}
-		return (
-			<div className='player-card' key={i}>
-				<p>{p.name}</p>
-				<p>{p.qcorrect}</p>
-			</div>
-		);
-	}
 
 
 	const renderQuestion = () => {
@@ -109,7 +63,7 @@ function App() {
 	return (
 		<div className="app">
 			<h1>Welcome to the APP DEMO</h1>
-			{renderCurrentLobby()}
+			<Lobby />
 			<InputBox />
 			{renderQuestion()}
 
