@@ -15,7 +15,7 @@ export const GlobalContextProvider = ({ children }) => {
     const [userAnswer, setUserAnswer] = useState(null);
     const [isShowAnswer, setIsShowAnswer] = useState(false);
     const [timeLeft, setTimeLeft] = useState(0);
-
+    const [totalTime, setTotalTime] = useState(0);
     // ie: sendEvent(STRING, Object)
     const sendGameEvent = (type, data) => {
         const gameEvent = {
@@ -75,7 +75,8 @@ export const GlobalContextProvider = ({ children }) => {
         console.log(gameEvent);
         switch (gameEvent.type) {
             case "TIME":
-                setTimeLeft(gameEvent.data);
+                const time = gameEvent.data
+                setTimeLeft(time);
                 break;
             case "JOIN":
                 setHasJoined(true);
@@ -134,7 +135,7 @@ export const GlobalContextProvider = ({ children }) => {
                 question, setQuestion,
                 userAnswer, setUserAnswer,
                 isShowAnswer, setIsShowAnswer,
-                timeLeft,
+                timeLeft, totalTime,
                 sendGameEvent,
                 handleStartGame,
                 handlePlayerJoin,
