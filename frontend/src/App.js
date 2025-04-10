@@ -1,6 +1,7 @@
 import InputBox from './components/InputBox';
 import Lobby from './components/Lobby';
 import QuestionDisplay from './components/QuestionDisplay';
+import TimerBar from './components/TimerBar';
 
 function App() {
 
@@ -10,6 +11,7 @@ function App() {
 			<p>It is a project built with Kotlin + SpringBoot WebSockets</p>
 			<Lobby />
 			<InputBox />
+			<TimerBar />
 			<QuestionDisplay />
 		</div>
 	);
