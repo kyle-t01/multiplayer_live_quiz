@@ -84,6 +84,7 @@ function App() {
 			// check if player has been KICKED
 			if (message.type == "KICK") {
 				setHasGameStarted(false);
+				setHasJoined(false)
 				// check if player has been KICKED
 				console.log("You were KICKED from the game!");
 				alert("A game is already in progress, wait for it to finish before joining!");
@@ -125,8 +126,9 @@ function App() {
 	}
 
 	const renderCurrentLobby = () => {
+		if (!hasJoined) return;
 		return (
-			<div className="lobby" hidden={!hasJoined}>
+			<div className="lobby">
 				<h2>Current Players</h2>
 				{lobby.map((p, i) => renderPlayerCard(p, i))}
 				<button className="button" onClick={handleStartGame} hidden={hasGameStarted}>
