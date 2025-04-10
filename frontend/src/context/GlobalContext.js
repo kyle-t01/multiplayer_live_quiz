@@ -14,6 +14,7 @@ export const GlobalContextProvider = ({ children }) => {
     const [question, setQuestion] = useState(null);
     const [userAnswer, setUserAnswer] = useState(null);
     const [isShowAnswer, setIsShowAnswer] = useState(false);
+    const [timeLeft, setTimeLeft] = useState(0);
 
     // ie: sendEvent(STRING, Object)
     const sendGameEvent = (type, data) => {
@@ -73,6 +74,9 @@ export const GlobalContextProvider = ({ children }) => {
         console.log("server sent GameEvent:");
         console.log(gameEvent);
         switch (gameEvent.type) {
+            case "TIME":
+                setTimeLeft(gameEvent.data);
+                break;
             case "JOIN":
                 setHasJoined(true);
                 console.log("You have joined the lobby!");
@@ -130,6 +134,7 @@ export const GlobalContextProvider = ({ children }) => {
                 question, setQuestion,
                 userAnswer, setUserAnswer,
                 isShowAnswer, setIsShowAnswer,
+                timeLeft,
                 sendGameEvent,
                 handleStartGame,
                 handlePlayerJoin,
