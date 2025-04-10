@@ -96,6 +96,8 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
 
 
                             var t:Long = 0
+                            // tell players total time allocated for this question
+                            emitToAll(GameEvent(GameEventType.TOTAL_TIME, answeringDuration))
                             while(t < answeringDuration) {
                                 // give time to players to answer questions
                                 emitToAll(GameEvent(GameEventType.TIME, answeringDuration-t))
