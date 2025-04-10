@@ -1,5 +1,3 @@
-import { useEffect, useState, useRef, } from 'react';
-import { GlobalVars } from './context/GlobalContext';
 import InputBox from './components/InputBox';
 import Lobby from './components/Lobby';
 import QuestionDisplay from './components/QuestionDisplay';
