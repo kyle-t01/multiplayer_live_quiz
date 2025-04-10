@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, } from 'react';
 import { GlobalVars } from './context/GlobalContext';
+import InputBox from './components/InputBox';
 
 function App() {
 
@@ -59,30 +60,6 @@ function App() {
 	}
 
 
-
-	const renderJoinLobby = () => {
-		return (
-			<div className="input-box" hidden={hasJoined}>
-				<h2>Join Quiz Lobby Here</h2>
-				<input
-					className="input"
-					type="text"
-					placeholder="Username..."
-					value={playerName}
-					onChange={(e) => { setPlayerName(e.target.value) }}
-					rows={1}
-					maxLength={15}
-				/>
-				<div className="char-counter">
-					{playerName.length} / {15}
-				</div>
-				<button className="button" onClick={handlePlayerJoin}>
-					Join Lobby
-				</button>
-			</div>
-		);
-	}
-
 	const renderQuestion = () => {
 		if (!question) return;
 		return (
@@ -133,7 +110,7 @@ function App() {
 		<div className="app">
 			<h1>Welcome to the APP DEMO</h1>
 			{renderCurrentLobby()}
-			{renderJoinLobby()}
+			<InputBox />
 			{renderQuestion()}
 
 		</div>
