@@ -220,8 +220,8 @@ function App() {
 	}
 
 	const handleUserAnswer = (i) => {
-		if (userAnswer != null) {
-			// you already answered!
+		if (userAnswer != null || isShowAnswer) {
+			// user already answered, or answer already revealed
 			return;
 		}
 		setUserAnswer(i);
