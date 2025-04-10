@@ -3,7 +3,8 @@ import { GlobalVars } from "../context/GlobalContext";
 
 const CountdownText = () => {
     // global state
-    const { timeLeft, totalTime } = GlobalVars();
+    const { timeLeft, totalTime, hasGameStarted } = GlobalVars();
+    if (!hasGameStarted) return;
 
     return (
         <div className="countdown-text">
