@@ -128,9 +128,12 @@ function App() {
 	const renderCurrentLobby = () => {
 		if (!hasJoined) return;
 		return (
-			<div className="lobby">
-				<h2>Current Players</h2>
-				{lobby.map((p, i) => renderPlayerCard(p, i))}
+			<div>
+				<h2>Active Players</h2>
+				<div className="lobby">
+					{lobby.map((p, i) => renderPlayerCard(p, i))}
+				</div>
+
 				<button className="button" onClick={handleStartGame} hidden={hasGameStarted}>
 					Start Quiz
 				</button>

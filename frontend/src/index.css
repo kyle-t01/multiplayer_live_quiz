@@ -47,9 +47,27 @@ code {
   color: rgb(255, 255, 255);
 }
 
-.player-card {
+.lobby {
+  display: flex;
   justify-content: flex-start;
+  flex-direction: row;
+  /*align-items: left;*/
   border: 1px solid rgb(0, 0, 0);
   background-color: #4b534f;
   color: rgb(255, 255, 255);
+
+  height: 80px;
+}
+
+.player-card {
+  background-color: #4b534f;
+  color: white;
+  border: 1px solid black;
+  width: 100px;
+  padding: 0.5rem;
+  text-align: center;
+
+  word-wrap: nowrap;
+  text-overflow: ellipsis;
+  white-space: normal;
 }
