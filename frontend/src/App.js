@@ -137,7 +137,12 @@ function App() {
 	}
 
 	const renderPlayerCard = (p, i) => {
-		return <p key={i}>{p.name} {p.qcorrect}</p>;
+		return (
+			<div className='player-card' key={i}>
+				<p>{p.name}</p>
+				<p>{p.qcorrect}</p>
+			</div>
+		);
 	}
 
 	const renderJoinLobby = () => {
