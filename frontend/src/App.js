@@ -142,6 +142,15 @@ function App() {
 	}
 
 	const renderPlayerCard = (p, i) => {
+		if (playerName == p.name) {
+			// render the current player's player-card
+			return (
+				<div className='self-player-card' key={i}>
+					<p>{p.name}</p>
+					<p>{p.qcorrect}</p>
+				</div>
+			);
+		}
 		return (
 			<div className='player-card' key={i}>
 				<p>{p.name}</p>
@@ -149,6 +158,8 @@ function App() {
 			</div>
 		);
 	}
+
+
 
 	const renderJoinLobby = () => {
 		return (
