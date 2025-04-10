@@ -102,6 +102,8 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                                 delay(updateDuration)
                                 t += updateDuration
                             }
+                            // timer has finished
+                            emitToAll(GameEvent(GameEventType.TIME, 0))
                             // reveal answer to all players
                             emitToAll(GameEvent(GameEventType.SHOW, q.answers))
                             // give time to players to view answers
