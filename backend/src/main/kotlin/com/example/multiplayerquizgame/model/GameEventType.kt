@@ -10,4 +10,5 @@ enum class GameEventType {
     SHOW, // reveal answers
     KICK, // kick player out of lobby
     LEAVE, // player left
+    TIME, // time remaining for an activity
 }

@@ -78,7 +78,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                     println("Launched Coroutine")
                     val answeringDuration:Long = 5000 // each Q has a 10s timer (that may be varied in the future)
                     val revealAnswerDuration:Long = 3000 // reveal answers for 5s before moving on
-
+                    val updateDuration:Long = 1000 // update every 1000ms
                     try {
                         // tell all players game has started!
                         emitToAll(GameEvent(GameEventType.START, ""))
@@ -93,8 +93,15 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
                             val q = lobby.quiz.getCurrentQ()
                             // send it to all players
                             emitToAll(GameEvent(GameEventType.QUESTION, q))
-                            // give time to players to answer questions
-                            delay(answeringDuration)
+
+
+                            var t:Long = 0
+                            while(t < answeringDuration) {
+                                // give time to players to answer questions
+                                emitToAll(GameEvent(GameEventType.TIME, answeringDuration-t))
+                                delay(updateDuration)
+                                t += updateDuration
+                            }
                             // reveal answer to all players
                             emitToAll(GameEvent(GameEventType.SHOW, q.answers))
                             // give time to players to view answers
