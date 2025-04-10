@@ -175,9 +175,22 @@ function App() {
 	}
 
 	const renderOption = (o, i) => {
-		// render selected user
+		// render selected user answer
 		const isSelectedAnswer = (i == userAnswer)
 		const optionClassName = (isSelectedAnswer) ? "selected-option" : "option";
+
+		// if answer was revealed then highlight the correct answer
+		const isCorrectAnswer = (i == question?.answers[0])
+		if (isCorrectAnswer && isShowAnswer) {
+			return (
+				<div key={i} className="correct-option" onClick={() => handleUserAnswer(i)}>
+					<p>{o}</p>
+				</div>
+			);
+
+		}
+
+		// else show selected option
 		return (
 			<div key={i} className={optionClassName} onClick={() => handleUserAnswer(i)}>
 				<p>{o}</p>
