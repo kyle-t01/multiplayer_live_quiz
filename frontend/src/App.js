@@ -14,45 +14,8 @@ function App() {
 		userAnswer, setUserAnswer,
 		isShowAnswer, setIsShowAnswer,
 		sendGameEvent,
-		handleGameEventMessage,
+		handlePlayerJoin,
 	} = GlobalVars();
-
-	// when the player joins the lobby, open connection to websocket
-	const handlePlayerJoin = () => {
-		if (!playerName.trim()) return;
-
-		// close existing socket
-		if (socketRef.current) {
-			socketRef.current.close();
-		}
-		// attempt connection
-		if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-			socketRef.current = new WebSocket('ws://localhost:8080/quiz');
-		}
-
-		// establish connection
-		socketRef.current.onopen = () => {
-			console.log('websocket open!');
-			sendGameEvent('join', playerName.trim());
-		};
-
-		// receive message
-		socketRef.current.onmessage = (message) => {
-			handleGameEventMessage(message);
-		};
-
-		// error
-		socketRef.current.onerror = (e) => {
-			console.log('websocket error!', e);
-		};
-
-		// disconnect
-		socketRef.current.onclose = () => {
-			console.log('websocket disconnected!');
-		};
-
-	};
-
 
 
 	const handleStartGame = () => {
