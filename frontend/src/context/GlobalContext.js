@@ -25,6 +25,58 @@ export const GlobalContextProvider = ({ children }) => {
         console.log(`sent a game event: ${type}: ${data}`);
     }
 
+    // messages sent from the game server
+    const handleGameEventMessage = (message) => {
+        const gameEvent = JSON.parse(message.data);
+        console.log("server sent GameEvent:");
+        console.log(gameEvent);
+        switch (gameEvent.type) {
+            case "JOIN":
+                setHasJoined(true);
+                console.log("You have joined the lobby!");
+                break;
+            case "LOBBY_UPDATE":
+                setLobby(gameEvent.data);
+                console.log("Updating current lobby!");
+                break;
+            case "START":
+                setHasGameStarted(true);
+                console.log("Starting or Joining an existing game!");
+                break;
+            case "END":
+                setHasGameStarted(false);
+                setUserAnswer(null);
+                setIsShowAnswer(false)
+                setQuestion(null)
+                console.log("Game has ended!");
+                break;
+            case "QUESTION":
+                setIsShowAnswer(false);
+                setQuestion(gameEvent.data);
+                setUserAnswer(null);
+                console.log("GOT A QUESTION");
+                break;
+            case "SHOW":
+                setIsShowAnswer(true);
+                console.log("SHOWING CURRENT ANSWERS");
+                break;
+            case "KICK":
+                setHasGameStarted(false);
+                setHasJoined(false)
+                // check if player has been KICKED
+                console.log("You were KICKED from the game!");
+                alert("A game is already in progress, wait for it to finish before joining!");
+                socketRef.current.close();
+                break;
+            case "ANSWER":
+                console.log("Your answer was received!");
+                break;
+            default:
+                alert("UNKNOWN IMPLEMENTATION of", gameEvent);
+        }
+    }
+
+
     return (
         <GlobalContext.Provider
             value={{
@@ -37,6 +89,7 @@ export const GlobalContextProvider = ({ children }) => {
                 userAnswer, setUserAnswer,
                 isShowAnswer, setIsShowAnswer,
                 sendGameEvent,
+                handleGameEventMessage,
             }}>
             {children}
         </GlobalContext.Provider>
