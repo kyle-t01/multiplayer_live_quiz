@@ -6,7 +6,7 @@ const InputBox = () => {
     // global state
     const { playerName, setPlayerName, handlePlayerJoin, hasJoined } = GlobalVars();
 
-    const maxChars = 8;
+    const maxChars = 10;
 
 
     return (
