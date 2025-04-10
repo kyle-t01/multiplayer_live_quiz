@@ -1,3 +1,4 @@
+import CountdownText from './components/CountdownText';
 import InputBox from './components/InputBox';
 import Lobby from './components/Lobby';
 import QuestionDisplay from './components/QuestionDisplay';
@@ -12,6 +13,7 @@ function App() {
 			<Lobby />
 			<InputBox />
 			<TimerBar />
+			<CountdownText />
 			<QuestionDisplay />
 		</div>
 	);

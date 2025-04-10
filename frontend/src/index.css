@@ -115,5 +115,21 @@ code {
   height: 15px;
   border: 1px solid #999;
   background-color: #4caf50;
-  transition: width 0.3s linear;
+  transition: width 0.25s linear;
+}
+
+
+.countdown-text {
+  width: 80%;
+  display: flex;
+  flex-direction: row;
+  align-items: right;
+  height: 15px;
+  transition: width 0.25s linear;
+}
+
+.countdown-text p {
+  margin: 0;
+  padding: 0;
+  font-size: 25px;
 }
