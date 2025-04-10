@@ -8,8 +8,15 @@ const TimerBar = () => {
 
     return (
         <div className="timer-bar">
-            <h2>{timeLeft} / {totalTime}</h2>
+
+            <div className="bar"
+                style={{ width: `${(timeLeft / totalTime) * 100}%` }}>
+                <p>{timeLeft / 1000}</p>
+            </div>
+
         </div>
+
+
     );
 
 }

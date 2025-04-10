@@ -78,6 +78,9 @@ export const GlobalContextProvider = ({ children }) => {
                 const time = gameEvent.data
                 setTimeLeft(time);
                 break;
+            case "TOTAL_TIME":
+                setTotalTime(gameEvent.data);
+                break;
             case "JOIN":
                 setHasJoined(true);
                 console.log("You have joined the lobby!");
