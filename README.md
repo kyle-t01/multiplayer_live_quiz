@@ -2,10 +2,10 @@
 
 This is a real-time multiplayer quiz app built with Kotlin, Spring Boot, and WebSockets. You can compete in a live real-time quiz with other players in a shared lobby.
 
-## GamePlay Video
+## Demo Video
+[![Demo Video](assets/gameplay.png)](assets/gameplay.mp4)
+(if video autoplay does not work, see below .gif)
 
-
-[![Watch the demo](assets/gameplay.png)](assets/gameplay.mp4)
 
 ## Purpose
 - explore a bit of Kotlin (coming from Java)
@@ -25,7 +25,10 @@ This is a real-time multiplayer quiz app built with Kotlin, Spring Boot, and Web
 
 
 
-### Gameplay in Action (.mp4 video)
+### Gameplay GIF
+
+![Multiplayer Quiz Demo GIF](assets/demo.gif)
+
 
 
 ## Limitations and Further Areas of Improvement
