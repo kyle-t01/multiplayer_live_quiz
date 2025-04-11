@@ -23,34 +23,41 @@ This is a real-time multiplayer quiz app built with Kotlin, Spring Boot, and Web
 - **Backend**: Kotlin + Spring Boot, WebSockets, Kotlin Coroutines
 - **Frontend**: React.js
 
-
-
 ### Gameplay GIF
 
 ![Multiplayer Quiz Demo GIF](assets/gameplay.gif)
 
 
+## How to run
+```
+git clone https://github.com/kyle-t01/multiplayer_live_quiz.git
+cd multiplayer-live-quiz
+```
+### Backend (JDK 21+)
+```
+cd backend
+./gradlew bootRun
+```
+### Frontend (Node.js 22+, npm)
+In another terminal (Git Bash):
+```
+cd frontend
+npm install
+npm start
+```
+### Running the App
+Backend WebSocket endpoint:
+```
+ws://localhost:8080/quiz
+```
+Frontend runs at:
+```
+http://localhost:3000
+```
+1. Open the browser http://localhost:3000 (and any additional duplicate tabs to test multiplayer functionality)
+2. Enter name and join the lobby (joining while a Game has started will result in a auto-KICK)
+3. When enough players in the lobby, start the quiz
+4. Questions are timed, and scores are updated real-time
 
-## Limitations and Further Areas of Improvement
-- coupling
-
-## How to run 
-
-
-## Addendum
-
-
-### Things Learnt
-- https vs websockets
-- long polling vs persistent connections
-- companion objects
-- coroutines and job
-- Spring Boot DI, IoC, beans, component
-
-### WebSockets
-
-### Kotlin
-
-### Spring Boot
 
 
