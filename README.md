@@ -27,7 +27,7 @@ This is a real-time multiplayer quiz app built with Kotlin, Spring Boot, and Web
 
 ### Gameplay GIF
 
-![Multiplayer Quiz Demo GIF](assets/demo.gif)
+![Multiplayer Quiz Demo GIF](assets/gameplay.gif)
 
 
 
