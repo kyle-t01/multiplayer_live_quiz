@@ -1,12 +1,11 @@
 # Multiplayer Live Quiz Demo: A Kotlin + Spring Boot WebSockets Project
 
-This is a real-time multiplayer quiz app bulit with Kotlin, Spring Boot, and WebSockets. You can compete in a live real-time quiz with other players in a shared lobby.
+This is a real-time multiplayer quiz app built with Kotlin, Spring Boot, and WebSockets. You can compete in a live real-time quiz with other players in a shared lobby.
 
 ## GamePlay Video
-<video width="80%" autoplay loop muted playsinline>
-  <source src="assets/gameplay.mp4" type="video/mp4">
-</video>
 
+
+[![Watch the demo](assets/gameplay.png)](assets/gameplay.mp4)
 
 ## Purpose
 - explore a bit of Kotlin (coming from Java)
@@ -15,10 +14,10 @@ This is a real-time multiplayer quiz app bulit with Kotlin, Spring Boot, and Web
 - learn how coroutines work
 
 ## Core Features
-- join lobby with a nickname, late-joiners to game are auto-kicked
+- join lobby with a nickname, and late-joiners to game are auto-kicked
 - core game loop (including Quiz Timers) handled by coroutines
 - real time updates (through WebSockets): player scores, players joining and leaving the lobby, Quiz Timers
-- disconnected player don't disrupt the current game
+- disconnected players don't disrupt the current game
 
 ## Technologies Used
 - **Backend**: Kotlin + Spring Boot, WebSockets, Kotlin Coroutines
