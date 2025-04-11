@@ -2,6 +2,7 @@ package com.example.multiplayerquizgame.websocket
 
 // models:
 import com.example.multiplayerquizgame.model.*
+import com.example.multiplayerquizgame.util.JsonMapper
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.*
@@ -15,9 +16,8 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
 
 
-class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
-    // allow conversion of Kotlin objects <-> JSON,
-    private val mapper = jacksonObjectMapper()
+class QuizWebSocketHandler (private val lobby: Lobby, private val mapper:JsonMapper) : TextWebSocketHandler(){
+
     /* TODO: could benefit from moving coroutine logic to GameController */
     // scope to hold coroutines
     private val gameLoopScope = CoroutineScope(CoroutineName("GameLoopScope"))
@@ -38,20 +38,18 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
     }
 
     // handle game events
-    @OptIn(DelicateCoroutinesApi::class)
     override fun handleTextMessage(session: WebSocketSession, message: TextMessage) {
-        val json = mapper.readTree(message.payload)
+        val gameEvent:GameEvent = mapper.readTextMessage(message)
         // json = { type: "", data: {} }
-        val typeStr:String = json.get("type").asText().uppercase()
-        val type = GameEventType.valueOf(typeStr)
-        val data = json.get("data").asText()
+        val type = gameEvent.type
+        val data = gameEvent.data
 
         // print game events sent by players to terminal
         // println("$type: $data")
 
         when (type) {
             GameEventType.JOIN -> {
-                val player = Player(data)
+                val player = Player(data.toString())
                 lobby.addToPlayers(session, player)
                 // did this player join when the game already started?
                 if (lobby.isGameStarted || gameLoopJob?.isActive == true) {
@@ -76,9 +74,9 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
 
                 gameLoopJob = gameLoopScope.launch {
                     println("Launched Coroutine")
-                    val answeringDuration:Long = 5000 // each Q has a 10s timer (that may be varied in the future)
-                    val revealAnswerDuration:Long = 3000 // reveal answers for 5s before moving on
-                    val updateDuration:Long = 1000 // update every 1000ms
+                    val answeringDuration:Long = 5000 // durations in ms
+                    val revealAnswerDuration:Long = 3000
+                    val updateDuration:Long = 1000
                     try {
                         // tell all players game has started!
                         emitToAll(GameEvent(GameEventType.START, ""))
@@ -124,7 +122,8 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
             }
             GameEventType.ANSWER -> {
                 // extract message
-                val ans:Int = data.toInt()
+                // TODO: toString().toInt() is for testing purposes only
+                val ans:Int = data.toString().toInt()
                 // validate answer
                 lobby.validateAnswer(session, ans)
                 // tell player the actual correct answer(s)
@@ -140,8 +139,7 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
 
     // emit signal to player
     private fun emit(session: WebSocketSession, event: GameEvent) {
-        val json = mapper.writeValueAsString(event)
-        session.sendMessage(TextMessage(json))
+        session.sendMessage(mapper.convertToTextMessage(event))
     }
 
     // emit signal to all players in lobby
@@ -160,10 +158,10 @@ class QuizWebSocketHandler (private val lobby: Lobby) : TextWebSocketHandler(){
 
 @Configuration
 @EnableWebSocket
-class WSConfig(private val lobby: Lobby): WebSocketConfigurer {
+class WSConfig(private val lobby: Lobby, private val mapper:JsonMapper): WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry
-            .addHandler(QuizWebSocketHandler(lobby), "/quiz")
+            .addHandler(QuizWebSocketHandler(lobby, mapper), "/quiz")
             .setAllowedOrigins("*")
     }
 }
