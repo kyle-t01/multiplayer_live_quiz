@@ -16,7 +16,7 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
 
 
-class QuizWebSocketHandler (private val lobby: Lobby, private val mapper:JsonMapper) : TextWebSocketHandler(){
+class QuizWebSocketHandler (private val mapper:JsonMapper) : TextWebSocketHandler(){
 
     /* TODO: could benefit from moving coroutine logic to GameController */
     // scope to hold coroutines
@@ -24,6 +24,9 @@ class QuizWebSocketHandler (private val lobby: Lobby, private val mapper:JsonMap
 
     // track gameLoop coroutine
     private var gameLoopJob: Job? = null
+
+    // the game lobby
+    private val lobby: Lobby = Lobby()
 
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
@@ -158,10 +161,10 @@ class QuizWebSocketHandler (private val lobby: Lobby, private val mapper:JsonMap
 
 @Configuration
 @EnableWebSocket
-class WSConfig(private val lobby: Lobby, private val mapper:JsonMapper): WebSocketConfigurer {
+class WSConfig(private val mapper:JsonMapper): WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry
-            .addHandler(QuizWebSocketHandler(lobby, mapper), "/quiz")
+            .addHandler(QuizWebSocketHandler(mapper), "/quiz")
             .setAllowedOrigins("*")
     }
 }
