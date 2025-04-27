@@ -67,4 +67,4 @@ You will be able to play against other players, or with a mini-maxing AI!
 Have a look at it (work in progress) here:
 [Chaos Chess Online](https://github.com/kyle-t01/chaos_chess_online)
 
-
+Also, as the next step in learning more about devops practices and tools: explore Kubernetes and Terraform
