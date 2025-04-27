@@ -1,0 +1,13 @@
+services:
+  backend:
+    image: tankaus/backend
+    ports:
+      - "8080:8080"
+
+  frontend:
+    image: tankaus/frontend
+    ports:
+      - "3000:80"
+    container_name: "FRONTEND"
+    depends_on:
+      - backend
