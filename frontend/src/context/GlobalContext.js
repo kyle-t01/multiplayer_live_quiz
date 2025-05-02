@@ -47,7 +47,7 @@ export const GlobalContextProvider = ({ children }) => {
         }
         // attempt connection
         if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-            socketRef.current = new WebSocket('ws://localhost:8080/quiz');
+            socketRef.current = new WebSocket(`ws://${window.location.hostname}:8080/quiz`);
         }
         // establish connection
         socketRef.current.onopen = () => {
