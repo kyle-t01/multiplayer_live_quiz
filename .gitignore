@@ -1,1 +1,4 @@
 .idea/
+backend.yaml
+frontend.yaml
+docker-load.sh
