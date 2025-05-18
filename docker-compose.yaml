@@ -7,7 +7,7 @@ services:
   frontend:
     image: tankaus/frontend
     ports:
-      - "3000:80"
+      - "80:80"
     container_name: "FRONTEND"
     depends_on:
       - backend
