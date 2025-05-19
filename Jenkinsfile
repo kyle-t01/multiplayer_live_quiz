@@ -13,6 +13,7 @@ pipeline {
         
         stage("connect to ec2") {
             
+            steps {
             echo 'connecting to ec2'
             sh '''
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no ec2-user@3.27.119.74 << EOF
@@ -22,6 +23,7 @@ pipeline {
                 docker-compose up -d
                 EOF
             '''
+            }
         }
         /*
         stage("build backend") {
@@ -49,9 +51,6 @@ pipeline {
                 sh 'docker push $DOCKER_FRONTEND_IMG'
             }
         }
-
-        stage("test") {
-            
             steps {
                 echo "testing the application... (no tests yet)"
             }
@@ -70,8 +69,6 @@ pipeline {
                 docker-compose up -d
                 EOF
                 '''
-            }
-        }
         */
 
     }
