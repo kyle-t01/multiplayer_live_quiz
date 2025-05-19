@@ -11,7 +11,7 @@ pipeline {
 
     stages {
         
-        stage("connect to ec2") {
+        stage("connect to ec2, and deploy") {
             
 
             /* in the future, could scp files and have docker images built on ec2, but this works for now*/
@@ -19,12 +19,7 @@ pipeline {
             steps {
             echo 'connecting to ec2...'
             sh '''
-                ssh -i $SSH_KEY -o StrictHostKeyChecking=no ec2-user@3.27.119.74 << EOF
-                cd /home/ec2-user
-                docker-compose down
-                docker-compose pull
-                docker-compose up -d
-                EOF
+                ssh -i $SSH_KEY -o StrictHostKeyChecking=no ec2-user@3.27.119.74 "cd /home/ec2-user && docker-compose down && docker-compose pull && docker-compose up -d"                
             '''
             }
         }
@@ -66,7 +61,7 @@ pipeline {
                 echo "deploying the app to EC2..."
                 sh '''
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no ec2-user@3.27.119.74 << EOF
-                cd /home/ec2-user/docker-compose/
+                cd /home/ec2-user
                 docker-compose down
                 docker-compose pull
                 docker-compose up -d
