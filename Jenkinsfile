@@ -1,7 +1,7 @@
 pipeline {
 
     agent any
-    
+
     environment {
         DOCKER_PAT = credentials('docker-pat')
         SSH_KEY = credentials('ec2-ssh-key')
@@ -10,7 +10,20 @@ pipeline {
     }
 
     stages {
-
+        
+        stage("connect to ec2") {
+            
+            echo 'connecting to ec2'
+            sh '''
+                ssh -i $SSH_KEY -o StrictHostKeyChecking=no ec2-user@3.27.119.74 << EOF
+                cd /home/ec2-user/docker-compose/
+                docker-compose down
+                docker-compose pull
+                docker-compose up -d
+                EOF
+            '''
+        }
+        /*
         stage("build backend") {
             
             steps {
@@ -43,14 +56,15 @@ pipeline {
                 echo "testing the application... (no tests yet)"
             }
         }
-
+        */
+        /*
         stage("deploy") {
             
             steps {
                 echo "deploying the app to EC2..."
                 sh '''
                 ssh -i $SSH_KEY -o StrictHostKeyChecking=no ec2-user@3.27.119.74 << EOF
-                cd /path/to/docker-compose/folder
+                cd /home/ec2-user/docker-compose/
                 docker-compose down
                 docker-compose pull
                 docker-compose up -d
@@ -58,6 +72,7 @@ pipeline {
                 '''
             }
         }
+        */
 
     }
 
