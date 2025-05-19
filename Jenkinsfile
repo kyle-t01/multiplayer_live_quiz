@@ -1,12 +1,7 @@
 pipeline {
 
-    agent {
-        docker {
-            image 'docker:latest'
-            args '--privileged -v /var/run/docker.sock:/var/run/docker.sock'
-        }
-    }
-
+    agent any
+    
     environment {
         DOCKER_PAT = credentials('docker-pat')
         SSH_KEY = credentials('ec2-ssh-key')
