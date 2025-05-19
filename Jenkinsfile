@@ -1,6 +1,11 @@
 pipeline {
 
-    agent any
+    agent {
+        docker {
+            image 'docker:latest'
+            args '--privileged -v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
 
     environment {
         DOCKER_PAT = credentials('docker-pat')
@@ -31,7 +36,7 @@ pipeline {
         stage("push docker images") {
             steps {
                 echo 'pushing docker images...'
-                sh 'docker login -u tankaus -p $DOCKER_PAT'
+                sh 'echo $DOCKER_PAT | docker login -u tankaus --password-stdin'
                 sh 'docker push $DOCKER_BACKEND_IMG'
                 sh 'docker push $DOCKER_FRONTEND_IMG'
             }
