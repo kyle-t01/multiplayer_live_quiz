@@ -11,7 +11,6 @@ pipeline {
         EC2_PATH = '/home/ec2-user/'
         LOCAL_BACKEND = 'backend/'
         LOCAL_FRONTEND = 'frontend/'
-        SCP_COMMAND = "scp -r -i $SSH_KEY -o StrictHostKeyChecking=no"
     }
 
     stages {
@@ -20,11 +19,11 @@ pipeline {
             steps {
             echo 'copying backend to EC2...'
             sh '''
-                $SCP_COMMAND $LOCAL_BACKEND $EC2_HOST:$EC2_PATH
+                scp -r -i $SSH_KEY -o StrictHostKeyChecking=no $LOCAL_BACKEND $EC2_HOST:$EC2_PATH
             '''
             echo 'copying frontend to EC2...'
             sh '''
-                $SCP_COMMAND $LOCAL_FRONTEND $EC2_HOST:$EC2_PATH
+                scp -r -i $SSH_KEY -o StrictHostKeyChecking=no $LOCAL_FRONTEND $EC2_HOST:$EC2_PATH
             '''
             }
         }
