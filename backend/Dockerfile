@@ -4,7 +4,9 @@ COPY gradlew .
 COPY gradle gradle
 COPY build.gradle.kts settings.gradle.kts ./
 COPY . .
+RUN chmod +x gradlew
 RUN ./gradlew build --no-daemon
+
 
 FROM eclipse-temurin:21-jre AS run
 WORKDIR /backend
