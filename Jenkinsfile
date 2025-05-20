@@ -11,7 +11,7 @@ pipeline {
         EC2_PATH = '/home/ec2-user/'
         LOCAL_BACKEND = 'backend/'
         LOCAL_FRONTEND = 'frontend/'
-        SCP_COMMAND = "scp -r -i \$SSH_KEY -o StrictHostKeyChecking=no"
+        SCP_COMMAND = "scp -r -i $SSH_KEY -o StrictHostKeyChecking=no"
     }
 
     stages {
@@ -28,7 +28,7 @@ pipeline {
             '''
             }
         }
-        
+        /*
         stage("Build Docker Images on EC2") {
             steps {
                 echo 'building backend on EC2...'
@@ -47,7 +47,7 @@ pipeline {
                 '''
             }
         }
-        
+        */
         stage("Test") {
             steps {
                 // test whether docker compose is up for now
@@ -59,7 +59,7 @@ pipeline {
                 '''
             }
         }
-        
+        /*
         stage("Push Docker Images") {
             steps {
                 echo 'pushing recently built docker images...'
@@ -71,7 +71,7 @@ pipeline {
                 '''
             }
         }
-        
+        */
         stage("Deploy") {
             steps {
                 echo "deploying the app on EC2..."
