@@ -90,7 +90,7 @@ pipeline {
                 cd /home/ec2-user &&
                 docker-compose down &&
                 docker-compose pull &&
-                docker-compose up -d &&
+                docker-compose up -d
                 "
                 '''
             }
