@@ -7,7 +7,7 @@ pipeline {
         SSH_KEY = credentials('ec2-ssh-key')
         DOCKER_FRONTEND_IMG = 'tankaus/frontend'
         DOCKER_BACKEND_IMG =  'tankaus/backend'
-        EC2_HOST = 'ec2-user@3.27.119.74'
+        EC2_HOST = 'ec2-user@54.79.146.28'
         EC2_PATH = '/home/ec2-user/'
         LOCAL_BACKEND = 'backend/'
         LOCAL_FRONTEND = 'frontend/'
