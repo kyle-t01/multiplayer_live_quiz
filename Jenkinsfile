@@ -14,9 +14,10 @@ pipeline {
     }
 
     stages {
-    
+        // in the future, should compress files into .tar.gz, but for now transfer everything
         stage("SCP source code to EC2") {
             steps {
+            /*
             echo 'copying backend to EC2...'
             sh '''
                 scp -r -i $SSH_KEY -o StrictHostKeyChecking=no $LOCAL_BACKEND $EC2_HOST:$EC2_PATH
@@ -24,6 +25,16 @@ pipeline {
             echo 'copying frontend to EC2...'
             sh '''
                 scp -r -i $SSH_KEY -o StrictHostKeyChecking=no $LOCAL_FRONTEND $EC2_HOST:$EC2_PATH
+            '''
+            */
+            echo 'copying docker-compose.yaml to EC2...'
+            sh '''
+                scp -r -i $SSH_KEY -o StrictHostKeyChecking=no docker-compose.yaml $EC2_HOST:$EC2_PATH
+            '''
+            sh '''
+                ssh -i $SSH_KEY -o StrictHostKeyChecking=no $EC2_HOST "
+                cat docker-compose.yaml
+                "
             '''
             }
         }
