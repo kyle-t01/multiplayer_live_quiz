@@ -1,8 +1,11 @@
 # Multiplayer Live Quiz Demo: A Kotlin + Spring Boot WebSockets Project
 
 This is a real-time multiplayer quiz app built with **Kotlin**, **Spring Boot**, and **WebSockets**.
-It is containerised with **Docker** and **Docker Compose**.
+It is containerised with **Docker** and **Docker Compose**, and deployed via a Jenkins CI/CD pipeline to an AWS EC2 instance.
 You can compete in a live real-time quiz with other players in a shared lobby.
+
+Take a look at the project here:
+[Multiplayer Live Quiz](http://54.79.146.28)
 
 ## Demo Video
 [![Demo Video](assets/gameplay.png)](assets/gameplay.mp4)
@@ -15,6 +18,7 @@ You can compete in a live real-time quiz with other players in a shared lobby.
 - implement WebSockets' real-time persistent connection
 - learn how coroutines work
 - learn about Docker containerisation (Dockerfiles, Docker compose) to improve production workflow
+- implement Jenkins CI/CD pipelines and deploy to AWS EC2
 
 ## Core Features
 - join lobby with a nickname, and late-joiners to game are auto-kicked
@@ -25,39 +29,35 @@ You can compete in a live real-time quiz with other players in a shared lobby.
 ## Technologies Used
 - **Backend**: Kotlin + Spring Boot, WebSockets, Kotlin Coroutines
 - **Frontend**: React.js
-- **Other**: Docker
+- **Devops CI/CD**: Docker, Docker Compose, AWS EC2, Jenkins
+- **Other**: bash scripting, ssh, scp
 
 ### Gameplay GIF
 
 ![Multiplayer Quiz Demo GIF](assets/gameplay.gif)
 
+## Jenkins CI/CD Pipeline
+The role of the Jenkins pipeline is to automate deployment to an AWS EC2 instance, whenever code is pushed GitHub repo main branch.
 
-## How to run
-1. First clone the repo
+1. on `git push` to main branch, `Jenkins pipline` is automatically triggered
+2. use `scp` to transfer source code and  `docker-compose.yaml` to `EC2` host
+3. `ssh` into remote `EC2` instance and build `Docker` images from source code
+4. push `Docker` images to `Docker Hub`
+5. run `docker-compose down, pull, up -d` on `EC2` instance to redeploy updated containers
+6. test whether services are up and running via `docker-compose ps`
 
-```
-git clone https://github.com/kyle-t01/multiplayer_live_quiz.git
-cd multiplayer-live-quiz
-```
-Then, if you have Docker, jump to step 2
 
-2. Ensure you already have [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and run:
-
-```
-docker-compose up
-```
+## Live Project link:
+[Multiplayer Live Quiz](http://54.79.146.28)
 
 ### Running the App
 
 ```
-1. Open the browser and go to the the frontend http://localhost:3000 
-2. To test multiplayer functionality, just open http://localhost:3000 in multiple tabs
-3. Enter name and join the lobby (joining while a Game has started will result in an auto-KICK)
-4. When enough players in the lobby, start the quiz
-5. Questions are timed, and scores are updated real-time
-6. When you are finished, run: docker-compose down
+1. Open http://54.79.146.28, use multiple tabs for multiplayer testing
+2. Enter name and join the lobby (joining while a Game has started will result in an auto-KICK)
+3. When enough players in the lobby, start the quiz
+4. Questions are timed, and scores are updated real-time
 ```
-
 
 ## Addendum
 After completing this project, I felt the urge to create something more complex and "interactive" than just a simple quiz game.
