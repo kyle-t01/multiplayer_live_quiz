@@ -3,6 +3,7 @@ package com.example.multiplayerquizgame.websocket
 // models:
 import com.example.multiplayerquizgame.model.*
 import com.example.multiplayerquizgame.util.JsonMapper
+import com.example.multiplayerquizgame.util.TimerService
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.*
@@ -85,14 +86,12 @@ class QuizWebSocketHandler (private val mapper:JsonMapper) : TextWebSocketHandle
 
                 gameLoopJob = gameLoopScope.launch {
                     println("Launched Coroutine")
-                    val answeringDuration:Long = 5000 // durations in ms
-                    val revealAnswerDuration:Long = 3000
-                    val updateDuration:Long = 1000
                     try {
                         // tell all players game has started!
                         emitToAll(GameEvent(GameEventType.START, ""))
                         // while we have questions
                         println("game status: isStarted = ${game.hasStarted()}, isEnded =${game.hasEnded()}")
+                        val timer = TimerService(gameLoopScope)
                         while (!game.hasEnded()) {
 
                             if (game.hasNoPlayers()) {
@@ -107,19 +106,27 @@ class QuizWebSocketHandler (private val mapper:JsonMapper) : TextWebSocketHandle
 
                             var t:Long = 0
                             // tell players total time allocated for this question
-                            emitToAll(GameEvent(GameEventType.TOTAL_TIME, answeringDuration))
-                            while(t < answeringDuration) {
-                                // give time to players to answer questions
-                                emitToAll(GameEvent(GameEventType.TIME, answeringDuration-t))
-                                delay(updateDuration)
-                                t += updateDuration
+                            emitToAll(GameEvent(GameEventType.TOTAL_TIME, TimerService.ANSWER_DURATION))
+
+                            // start timer
+
+                            val answerTimer = timer.startAnswerTimer {
+                                // timer has finished
+                                emitToAll(GameEvent(GameEventType.TIME, 0))
                             }
-                            // timer has finished
-                            emitToAll(GameEvent(GameEventType.TIME, 0))
-                            // reveal answer to all players
+
+                            answerTimer.join()
+
+                            // reveal answers
                             emitToAll(GameEvent(GameEventType.SHOW, q.answers))
-                            // give time to players to view answers
-                            delay(revealAnswerDuration)
+                            val revealTimer = timer.startRevealTimer {
+                                // give time for players to review answers
+                                println("reviewing answers")
+                            }
+
+                            revealTimer.join()
+
+
                             // increment the current question index
                             game.prepareNextQuestion()
                         }
