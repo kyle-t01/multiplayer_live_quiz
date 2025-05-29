@@ -34,8 +34,8 @@ class QuizWebSocketHandler (private val mapper:JsonMapper) : TextWebSocketHandle
 
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        lobby.removePlayer(session)
-        game.removePlayer(lobby.getPlayerFromSession(session))
+        val removedPlayer = lobby.removePlayer(session)
+        game.removePlayer(removedPlayer)
         emitToAllLobbyUpdate()
 
         // when all players have disconnected from game, stop the gameLoopJob
@@ -54,6 +54,9 @@ class QuizWebSocketHandler (private val mapper:JsonMapper) : TextWebSocketHandle
 
         // print game events sent by players to terminal
         // println("$type: $data")
+
+        // should do handleGameEvent()
+
 
         when (type) {
             GameEventType.JOIN -> {
