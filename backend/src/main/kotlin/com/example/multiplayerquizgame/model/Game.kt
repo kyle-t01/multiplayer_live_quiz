@@ -87,6 +87,10 @@ class Game()
         return
     }
 
+    fun getPlayers(): MutableList<Player> {
+        return players
+    }
+
     fun hasNoPlayers(): Boolean {
         return players.isEmpty()
     }
