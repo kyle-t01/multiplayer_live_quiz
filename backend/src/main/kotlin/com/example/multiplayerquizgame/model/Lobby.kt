@@ -3,21 +3,13 @@ package com.example.multiplayerquizgame.model
 import org.springframework.web.socket.WebSocketSession
 class Lobby(
     val players: MutableMap<WebSocketSession, Player> = mutableMapOf(),
-    val quiz: Quiz = Quiz(),
-    var isGameStarted: Boolean = false,
-
 ) {
 
     // remove a <session, player> from lobby on disconnect
     fun removePlayer(session: WebSocketSession) {
         val player= players[session]
-        println("$player LEFT the game! [${players.size -1} players left...]")
+        println("$player LEFT the MAIN LOBBY! [${players.size -1} players left...]")
         players.remove(session)
-
-        // if there are no more players, then the game has ended
-        if (players.isEmpty()) {
-            isGameStarted = false;
-        }
         return
     }
 
@@ -34,38 +26,9 @@ class Lobby(
         return
     }
 
-    // start the game
-    fun startGame() {
-        println("Game has officially started.")
-        isGameStarted = true
-        // load Quiz
-        quiz.loadQuiz()
-        // reset the scores of every player
-        for (p in getPlayers()) {
-            p.resetScore()
-        }
+    fun getPlayerFromSession(session: WebSocketSession): Player? {
+        return players[session]
     }
 
-    // end the game
-    fun endGame() {
-        println("Game has been terminated.")
-        isGameStarted = false
-        // reset Quiz
-        quiz.endQuiz()
-    }
-
-    // validate a player's answer
-    fun validateAnswer(session: WebSocketSession, ans: Int) {
-        val player = players[session]
-
-        // change player score based on answer
-        if (quiz.getCurrentA().contains(ans)) {
-            println("$player has answered $ans [V] correct")
-            player!!.qCorrect += 1
-        } else {
-            println("$player has answered $ans [X] incorrect")
-        }
-
-    }
 
 }
