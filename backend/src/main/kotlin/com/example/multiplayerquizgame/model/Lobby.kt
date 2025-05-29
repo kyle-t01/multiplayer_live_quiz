@@ -6,11 +6,10 @@ class Lobby(
 ) {
 
     // remove a <session, player> from lobby on disconnect
-    fun removePlayer(session: WebSocketSession) {
+    fun removePlayer(session: WebSocketSession): Player? {
         val player= players[session]
         println("$player LEFT the MAIN LOBBY! [${players.size -1} players left...]")
-        players.remove(session)
-        return
+        return players.remove(session)
     }
 
     // return a List<Player> currently in the lobby

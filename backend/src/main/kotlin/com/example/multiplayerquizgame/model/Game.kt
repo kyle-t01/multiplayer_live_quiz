@@ -15,12 +15,6 @@ class Game()
         return isEnded
     }
 
-    // add player (if not unique)
-    fun addPlayer(player: Player) {
-        if (players.contains(player)) return
-        players.add(player)
-    }
-
     // fun get current state
 
     // starting and stopping games
