@@ -58,18 +58,18 @@ val q7 = Question(
     answers = listOf(1)
 )
 
-data class Quiz(
-    val questionList: MutableList<Question> = mutableListOf(),
-    var currentIndex: Int = 0,
+class Quiz() {
+    private val questionList: MutableList<Question> = mutableListOf()
+    private var currentIndex: Int = 0
 
-) {
-    // load questions into quiz from CSV file (hard-coded for now), and return first question
-    fun loadQuiz(): Question {
-        questionList.clear()
-        currentIndex = 0
-        questionList.addAll(mutableListOf(q1, q2, q3, q4, q5, q6, q7))
-        // null-safety: since questions are hard-coded, assume impossible to be null
-        return questionList[0]
+
+    companion object {
+        fun createQuizDefault(): Quiz {
+            val quiz = Quiz()
+            quiz.questionList.addAll(mutableListOf(q1, q2, q3, q4, q5, q6, q7))
+            quiz.currentIndex = 0
+            return quiz
+        }
     }
 
     // end Quiz, reset to default state
@@ -83,32 +83,26 @@ data class Quiz(
         return (currentIndex >= questionList.size)
     }
 
-    // get next question
-    fun getNextQ():Question? {
-        currentIndex += 1
-        return when (isFinished()) {
-            true -> {
-                null
-            }
-
-            false -> {
-                questionList[currentIndex]
-            }
-        }
-    }
 
     // get current question, isFinished() must be called beforehand
     fun getCurrentQ():Question {
+        require(questionList.size > 0) {"ERROR: no questions!"}
         val q = questionList[currentIndex]
         println("Current question: ${q.question}")
         return q
     }
 
-    // get current answer(s), isFinished() must be called beforehand
+    // get current answer(s)
     fun getCurrentA():List<Int> {
         return questionList[currentIndex].answers
     }
 
+    // prepare the next question (increments index by 1), return false if no more questions
+    fun prepareNextQ(): Boolean {
+        if (isFinished()) return false
+        currentIndex += 1
+        return true
+    }
 
 
 }
