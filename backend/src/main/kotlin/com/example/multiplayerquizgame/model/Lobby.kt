@@ -29,5 +29,8 @@ class Lobby(
         return players[session]
     }
 
+    fun getSessionFromPlayer(player: Player): WebSocketSession? {
+        return players.entries.find{ it.value == player}?.key
+    }
 
 }
