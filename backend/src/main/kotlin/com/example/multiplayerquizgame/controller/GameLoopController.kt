@@ -8,6 +8,7 @@ import org.springframework.web.socket.WebSocketSession
 
 class GameLoopController(private val lobby: Lobby,
                          private val game: Game,
+                         private val emitter: Emitter,
                          private val gameLoopScope: CoroutineScope = CoroutineScope(CoroutineName("GameLoopScope"))
 )
 {
@@ -42,7 +43,6 @@ class GameLoopController(private val lobby: Lobby,
         game.addPlayer(player)
 
         // emit signals
-
 
     }
 
