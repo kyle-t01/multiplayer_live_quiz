@@ -1,9 +1,12 @@
 package com.example.multiplayerquizgame.controller
 
 import com.example.multiplayerquizgame.model.GameEvent
+import com.example.multiplayerquizgame.model.GameEventType
 import com.example.multiplayerquizgame.util.JsonMapper
+import org.springframework.stereotype.Component
 import org.springframework.web.socket.WebSocketSession
 
+@Component
 class Emitter(private val mapper: JsonMapper) {
     // send data to sessions
     /**
@@ -17,8 +20,17 @@ class Emitter(private val mapper: JsonMapper) {
         session.sendMessage(msg)
     }
 
-
-    private fun emitToAll(event) {
-        
+    /**
+     * Emit to all session of a list
+     *
+     * @param sessionList
+     * @param event
+     */
+    private fun emitToAll(sessionList: List<WebSocketSession>, event: GameEvent) {
+        for (s in sessionList){
+            emit(s, event)
+        }
     }
+
+
 }
