@@ -1,6 +1,7 @@
 package com.example.multiplayerquizgame.websocket
 
 // models:
+import com.example.multiplayerquizgame.controller.GameLoopController
 import com.example.multiplayerquizgame.model.*
 import com.example.multiplayerquizgame.util.JsonMapper
 import com.example.multiplayerquizgame.util.TimerService
@@ -17,32 +18,11 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
 
 
-class QuizWebSocketHandler (private val mapper:JsonMapper) : TextWebSocketHandler(){
-
-    /* TODO: could benefit from moving coroutine logic to GameController */
-    // scope to hold coroutines
-    private val gameLoopScope = CoroutineScope(CoroutineName("GameLoopScope"))
-
-    // track gameLoop coroutine
-    private var gameLoopJob: Job? = null
-
-    // the public lobby storing all connections
-    private val lobby: Lobby = Lobby()
-
-    // a single game (for now)
-    private val game: Game = Game()
+class QuizWebSocketHandler (private val mapper:JsonMapper, private val lobby: Lobby) : TextWebSocketHandler() {
 
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        val removedPlayer = lobby.removePlayer(session)
-        game.removePlayer(removedPlayer)
-        emitToAllLobbyUpdate()
 
-        // when all players have disconnected from game, stop the gameLoopJob
-        if (game.hasNoPlayers()) {
-            gameLoopJob?.cancel()
-            gameLoopJob = null
-        }
     }
 
     // handle game events
@@ -53,137 +33,18 @@ class QuizWebSocketHandler (private val mapper:JsonMapper) : TextWebSocketHandle
         val data = gameEvent.data
 
         // print game events sent by players to terminal
-        // println("$type: $data")
+        println("$type: $data")
+        
 
-        // should do handleGameEvent()
-
-
-        when (type) {
-            GameEventType.JOIN -> {
-                val player = Player(data.toString())
-                // add to lobby, and add to game
-                lobby.addToPlayers(session, player)
-                // did this player join when the game already started?
-                if (game.hasStarted() || gameLoopJob?.isActive == true) {
-                    // then KICK the player
-                    println("Kicking ${player.name} from game.")
-                    emit(session, GameEvent(GameEventType.KICK, ""))
-                    return
-                }
-                // add to game
-                game.addPlayer(lobby.getPlayerFromSession(session))
-                // signal to the player, of successful JOIN
-                emit(session,GameEvent(GameEventType.JOIN, player))
-                // update the lobby of all players
-                emitToAllLobbyUpdate()
-            }
-            GameEventType.START -> {
-                if (game.hasStarted() || gameLoopJob?.isActive == true) {
-                    // game already started
-                    println("game already started!!!")
-                    return
-                }
-                game.start()
-                // update the initial score of all players
-                emitToAllLobbyUpdate()
-
-                gameLoopJob = gameLoopScope.launch {
-                    println("Launched Coroutine")
-                    try {
-                        // tell all players game has started!
-                        emitToAll(GameEvent(GameEventType.START, ""))
-                        // while we have questions
-                        println("game status: isStarted = ${game.hasStarted()}, isEnded =${game.hasEnded()}")
-                        val timer = TimerService(gameLoopScope)
-                        while (!game.hasEnded()) {
-
-                            if (game.hasNoPlayers()) {
-                                // if no players, exit co-routine
-                                return@launch
-                            }
-                            // get current question
-                            val q = game.getCurrentQuestion()
-                            // send it to all players
-                            emitToAll(GameEvent(GameEventType.QUESTION, q))
-
-
-                            var t:Long = 0
-                            // tell players total time allocated for this question
-                            emitToAll(GameEvent(GameEventType.TOTAL_TIME, TimerService.ANSWER_DURATION))
-
-                            // start timer
-
-                            val answerTimer = timer.startAnswerTimer {
-                                // timer has finished
-                                emitToAll(GameEvent(GameEventType.TIME, 0))
-                            }
-
-                            answerTimer.join()
-
-                            // reveal answers
-                            emitToAll(GameEvent(GameEventType.SHOW, q.answers))
-                            val revealTimer = timer.startRevealTimer {
-                                // give time for players to review answers
-                                println("reviewing answers")
-                            }
-
-                            revealTimer.join()
-
-
-                            // increment the current question index
-                            game.prepareNextQuestion()
-                        }
-                    } finally {
-                        // any time co-routine exits (or when gameLoop needs to end)
-                        println("Exiting Coroutine")
-                        game.end()
-                        gameLoopJob = null
-                        emitToAll(GameEvent(GameEventType.END, ""))
-                    }
-                }
-            }
-            GameEventType.ANSWER -> {
-                // extract message
-                // TODO: toString().toInt() is for testing purposes only
-                val ans:Int = data.toString().toInt()
-                // validate answer
-                game.validatePlayerAnswer(lobby.getPlayerFromSession(session), ans)
-                // tell player the actual correct answer(s)
-                emit(session, GameEvent(GameEventType.ANSWER, game.getCurrentAnswer()))
-                // broadcast state change to everyone
-                emitToAllLobbyUpdate()
-            }
-            else -> {
-                println("Unexpected Usage of $type !")
-            }
-        }
     }
-
-    // emit signal to player
-    private fun emit(session: WebSocketSession, event: GameEvent) {
-        session.sendMessage(mapper.convertToTextMessage(event))
-    }
-
-    // emit signal to all players in lobby
-    private fun emitToAll(event: GameEvent) {
-        for (s in lobby.players.keys) {
-            emit(s, event)
-        }
-    }
-
-    // helper signal to perform a lobby update
-    private fun emitToAllLobbyUpdate() {
-        emitToAll(GameEvent(GameEventType.LOBBY_UPDATE, lobby.getPlayers()))
-    }
-
 }
 
 @Configuration
 @EnableWebSocket
-class WSConfig(private val mapper:JsonMapper): WebSocketConfigurer {
+class WSConfig(private val mapper:JsonMapper, private val lobby: Lobby): WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry
-            .addHandler(QuizWebSocketHandler(mapper), "/quiz")
+            .addHandler(QuizWebSocketHandler(mapper, lobby), "/quiz")
             .setAllowedOrigins("*")
     }
 }
