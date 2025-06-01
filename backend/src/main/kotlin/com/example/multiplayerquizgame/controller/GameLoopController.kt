@@ -96,22 +96,31 @@ class GameLoopController(private val lobby: Lobby,
                     // send current question
                     emitQuestion()
                     // send total time
-                    emitTotalTime()
+                    emitTotalAnswerTime()
                     // start ticking answer timer
                     val answerTimer = timer.startTickingAnswerTimer(
                         onTick = {
                             timeLeft -> emitTime(timeLeft)
                         },
                         task = {
-                            println("finished task")
+                            println("finished answerTimer...")
                         }
                     )
                     answerTimer.join()
-                    // reveal answers
-                    val revealTimer = timer.startRevealTimer {
-                        println("reviewing answers")
-                    }
 
+
+
+                    emitShow()
+                    emitTotalRevealTime()
+                    // reveal answers
+                    val revealTimer = timer.startTickingRevealTimer(
+                        onTick = {
+                                timeLeft -> emitTime(timeLeft)
+                        },
+                        task = {
+                            println("finished revealTimer...")
+                        }
+                    )
                     revealTimer.join()
                     game.prepareNextQuestion()
                 }
@@ -184,8 +193,18 @@ class GameLoopController(private val lobby: Lobby,
      * Emit total time
      *
      */
-    fun emitTotalTime() {
+    fun emitTotalAnswerTime() {
         val t = TimerService.ANSWER_DURATION
+        val event = GameEvent(GameEventType.TOTAL_TIME, t)
+        emitToGameLobby(event)
+    }
+
+    /**
+     * Emit reveal total time
+     *
+     */
+    fun emitTotalRevealTime() {
+        val t = TimerService.REVEAL_ANSWER_DURATION
         val event = GameEvent(GameEventType.TOTAL_TIME, t)
         emitToGameLobby(event)
     }
@@ -213,9 +232,20 @@ class GameLoopController(private val lobby: Lobby,
      *
      */
     fun emitAnswer(session: WebSocketSession) {
+        //  TODO: should be player's answer
         val data = game.getCurrentAnswer()
         val event = GameEvent(GameEventType.ANSWER, data)
         emitter.emit(session, event)
+    }
+
+    /**
+     * Emit show
+     *
+     */
+    fun emitShow() {
+        val data = game.getCurrentAnswer()
+        val event = GameEvent(GameEventType.SHOW, data)
+        emitToGameLobby(event)
     }
 
     /**
