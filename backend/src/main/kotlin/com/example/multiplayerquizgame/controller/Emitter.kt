@@ -15,7 +15,7 @@ class Emitter(private val mapper: JsonMapper) {
      * @param session
      * @param event
      */
-    private fun emit(session: WebSocketSession, event: GameEvent) {
+    fun emit(session: WebSocketSession, event: GameEvent) {
         val msg = mapper.convertToTextMessage(event)
         session.sendMessage(msg)
     }
@@ -26,11 +26,10 @@ class Emitter(private val mapper: JsonMapper) {
      * @param sessionList
      * @param event
      */
-    private fun emitToAll(sessionList: List<WebSocketSession>, event: GameEvent) {
+    fun emitToAll(sessionList: List<WebSocketSession>, event: GameEvent) {
         for (s in sessionList){
             emit(s, event)
         }
     }
-
 
 }
