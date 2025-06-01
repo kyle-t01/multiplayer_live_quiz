@@ -99,8 +99,8 @@ class Quiz() {
 
     // prepare the next question (increments index by 1), return false if no more questions
     fun prepareNextQ(): Boolean {
-        if (isFinished()) return false
         currentIndex += 1
+        if (isFinished()) return false
         return true
     }
 
