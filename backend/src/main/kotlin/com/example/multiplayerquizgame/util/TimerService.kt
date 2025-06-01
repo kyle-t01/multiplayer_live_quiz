@@ -34,6 +34,8 @@ class TimerService(private val scope: CoroutineScope) {
                 delay(TICK_DURATION)
                 t -= TICK_DURATION
             }
+            // finished timer
+            onTick(0)
             task()
         }
     }
