@@ -1,6 +1,8 @@
 package com.example.multiplayerquizgame.model
-
+import org.springframework.stereotype.Component
 import org.springframework.web.socket.WebSocketSession
+
+@Component
 class Lobby(
     val players: MutableMap<WebSocketSession, Player> = mutableMapOf(),
 ) {
