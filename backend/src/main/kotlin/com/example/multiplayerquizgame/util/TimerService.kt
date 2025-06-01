@@ -8,6 +8,7 @@ class TimerService(private val scope: CoroutineScope) {
         val ANSWER_DURATION = 5000L
         val REVEAL_ANSWER_DURATION = 3000L
         val TICK_DURATION = 1000L
+        val DELAY = 1000L
     }
 
     fun startAnswerTimer(task: suspend() -> Unit): Job {
@@ -36,6 +37,8 @@ class TimerService(private val scope: CoroutineScope) {
             }
             // finished timer
             onTick(0)
+            // natural delay
+            delay(DELAY)
             task()
         }
     }
@@ -51,6 +54,19 @@ class TimerService(private val scope: CoroutineScope) {
      */
     fun startTickingAnswerTimer(task: suspend() -> Unit, onTick: suspend(timeLeft: Long) -> Unit): Job {
         return startTickingTimer(ANSWER_DURATION, task, onTick)
+    }
+
+    /**
+     * Start ticking reveal timer
+     *
+     * @param task
+     * @param onTick
+     * @receiver
+     * @receiver
+     * @return
+     */
+    fun startTickingRevealTimer(task: suspend() -> Unit, onTick: suspend(timeLeft: Long) -> Unit): Job {
+        return startTickingTimer(REVEAL_ANSWER_DURATION, task, onTick)
     }
 
     private fun startTimer(duration: Long, task: suspend() -> Unit): Job {
