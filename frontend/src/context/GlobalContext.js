@@ -8,6 +8,7 @@ export const GlobalContextProvider = ({ children }) => {
 
     const socketRef = useRef(null);
     const [playerName, setPlayerName] = useState("");
+    const [roomCode, setRoomCode] = useState("")
     const [hasJoined, setHasJoined] = useState(false);
     const [lobby, setLobby] = useState([]);
     const [hasGameStarted, setHasGameStarted] = useState(false);
@@ -41,7 +42,7 @@ export const GlobalContextProvider = ({ children }) => {
 
     // when the player joins the lobby, open connection to websocket
     const handlePlayerJoin = () => {
-        if (!playerName.trim()) return;
+        if (!playerName.trim() || !roomCode.trim() || roomCode.length != 4) return;
         // close existing socket
         if (socketRef.current) {
             socketRef.current.close();
@@ -53,7 +54,9 @@ export const GlobalContextProvider = ({ children }) => {
         // establish connection
         socketRef.current.onopen = () => {
             console.log('websocket open!');
-            sendGameEvent('join', playerName.trim());
+            console.log(`${playerName} attempting to join lobby with code ${roomCode}`)
+            const joinData = { playerName: playerName, roomCode: roomCode }
+            sendGameEvent('join', joinData);
         };
         // receive message
         socketRef.current.onmessage = (message) => {
@@ -135,6 +138,7 @@ export const GlobalContextProvider = ({ children }) => {
             value={{
                 socketRef,
                 playerName, setPlayerName,
+                roomCode, setRoomCode,
                 hasJoined, setHasJoined,
                 lobby, setLobby,
                 hasGameStarted, setHasGameStarted,
