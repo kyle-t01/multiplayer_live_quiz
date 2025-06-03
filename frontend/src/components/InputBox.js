@@ -4,10 +4,10 @@ import { GlobalVars } from "../context/GlobalContext";
 const InputBox = () => {
 
     // global state
-    const { playerName, setPlayerName, handlePlayerJoin, hasJoined } = GlobalVars();
+    const { playerName, setPlayerName, roomCode, setRoomCode, handlePlayerJoin, hasJoined } = GlobalVars();
 
     const maxChars = 10;
-
+    const maxCodesize = 4;
 
     return (
         <div className="input-box" hidden={hasJoined}>
@@ -15,7 +15,7 @@ const InputBox = () => {
             <input
                 className="input"
                 type="text"
-                placeholder="Username..."
+                placeholder="USERNAME..."
                 value={playerName}
                 onChange={(e) => { setPlayerName(e.target.value) }}
                 rows={1}
@@ -24,8 +24,17 @@ const InputBox = () => {
             <div className="char-counter">
                 {playerName.length} / {maxChars}
             </div>
+            <input
+                className="input"
+                type="text"
+                placeholder="ROOM CODE..."
+                value={roomCode}
+                onChange={(e) => { setRoomCode(e.target.value) }}
+                rows={1}
+                maxLength={maxCodesize}
+            />
             <button className="button" onClick={handlePlayerJoin}>
-                Join Lobby
+                Connect to Room
             </button>
         </div>
     );
