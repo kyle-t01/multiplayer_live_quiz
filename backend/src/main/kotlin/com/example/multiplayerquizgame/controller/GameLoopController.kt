@@ -133,7 +133,7 @@ class GameLoopController(private val lobby: Lobby,
                 println("game status: isStarted = ${game.hasStarted()}, isEnded =${game.hasEnded()}")
                 val timer = TimerService(gameLoopScope)
                 while (!game.hasEnded()) {
-                    if (game.hasNoPlayers()) {
+                    if (hasNoPlayers()) {
                         // no more players, exit
                         return@launch
                     }
@@ -320,11 +320,15 @@ class GameLoopController(private val lobby: Lobby,
         emitLobbyUpdate()
 
         // when all players have disconnected from game, stop game loop
-        if (game.hasNoPlayers()) {
+        if (hasNoPlayers()) {
             gameLoopJob?.cancel()
             gameLoopJob = null
         }
 
+    }
+
+    fun hasNoPlayers(): Boolean {
+        return game.hasNoPlayers()
     }
 
 }
