@@ -17,7 +17,7 @@ class JsonMapper {
         // json = { type: "", data: {} }
         val typeStr:String = json.get("type").asText().uppercase()
         val type = GameEventType.valueOf(typeStr)
-        val data = json.get("data").asText()
+        val data = json.get("data")
         return  GameEvent(type, data)
     }
 
