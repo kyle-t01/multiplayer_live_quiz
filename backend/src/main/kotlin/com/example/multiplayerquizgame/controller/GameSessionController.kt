@@ -18,7 +18,6 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         if (games.size >= MAX_GAMES) {
             // EXCEED max games
             println("Too many games, currently ${games.size}")
-            return
         }
         // else, add the game
         val game = GameLoopController(lobby, emitter)
@@ -32,6 +31,13 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
     }
 
     fun handleGameEventTraffic(session: WebSocketSession, gameEvent: GameEvent) {
+        // are we creating a new room?
+        val type = gameEvent.type
+        if (type == GameEventType.CREATE) {
+            // yes, so create new room
+            createGame()
+        }
+
         // find roomCode associated with this session
         val game = findGameRoomFromSession(session)
         if (game == null) {

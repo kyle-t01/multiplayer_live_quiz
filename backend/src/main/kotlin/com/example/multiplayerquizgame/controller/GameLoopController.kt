@@ -52,6 +52,7 @@ class GameLoopController(private val lobby: Lobby,
 
 
         when(type) {
+            GameEventType.CREATE -> handleJoin(session, gameEvent)
             GameEventType.JOIN -> handleJoin(session, gameEvent)
             GameEventType.START -> handleStart(session, gameEvent)
             GameEventType.ANSWER -> handleAnswer(session, gameEvent)
