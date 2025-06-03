@@ -23,6 +23,7 @@ class GameLoopController(private val lobby: Lobby,
         // generate ID (not unique)
         fun generateRoomCode(): String{
             val id = Random.nextInt(0,10000).toString().padStart(GAME_ID_LENGTH,'0')
+            println("Added game: ${id}")
             return id
         }
         val GAME_ID_LENGTH = 4
@@ -83,6 +84,10 @@ class GameLoopController(private val lobby: Lobby,
                 }
         */
 
+        if (game.hasStarted()) {
+            emitStartToSession(session)
+        }
+
         // emit signals
         emitter.emit(session, GameEvent(GameEventType.JOIN, player))
         emitLobbyUpdate()
@@ -95,9 +100,9 @@ class GameLoopController(private val lobby: Lobby,
      * @param gameEvent
      */
     fun handleStart(session: WebSocketSession, gameEvent: GameEvent) {
-        // if the game has already started then return
+        // if started and not yet ended
         if (game.hasStarted()) {
-            println("game already started")
+            println("Game is already in progress...")
             return
         }
         // start the game
@@ -204,6 +209,18 @@ class GameLoopController(private val lobby: Lobby,
     fun emitStart() {
         val event = GameEvent(GameEventType.START, "")
         emitToGameLobby(event)
+    }
+
+    /**
+     * Emit start to session
+     *
+     * Tell player a game has already started when join
+     *
+     * @param session
+     */
+    fun emitStartToSession(session: WebSocketSession) {
+        val event = GameEvent(GameEventType.START, "")
+        emitter.emit(session,event)
     }
 
     /**
