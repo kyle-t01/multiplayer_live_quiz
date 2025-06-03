@@ -50,14 +50,28 @@ class GameLoopController(private val lobby: Lobby,
         val type = gameEvent.type
         val data = gameEvent.data
 
-
         when(type) {
-            GameEventType.CREATE -> handleJoin(session, gameEvent)
+            GameEventType.CREATE -> handleCreate(session, gameEvent)
             GameEventType.JOIN -> handleJoin(session, gameEvent)
             GameEventType.START -> handleStart(session, gameEvent)
             GameEventType.ANSWER -> handleAnswer(session, gameEvent)
             else -> println("unexpected usage of ${gameEvent}!")
         }
+    }
+
+    fun handleCreate(session: WebSocketSession, gameEvent: GameEvent) {
+        // pretty much the same code as handleJoin() but doesn't check room code
+        val jsonData = gameEvent.data as JsonNode
+
+        // create player
+        val name = jsonData.get("playerName")?.asText() ?: "Joining..."
+        val player = Player(name, 0, roomCode)
+        lobby.addToPlayers(session, player)
+        game.addPlayer(player)
+
+        // emit signals
+        emitter.emit(session, GameEvent(GameEventType.JOIN, player))
+        emitLobbyUpdate()
     }
 
     /**
@@ -87,16 +101,7 @@ class GameLoopController(private val lobby: Lobby,
         lobby.addToPlayers(session, player)
         game.addPlayer(player)
 
-        // still allow players to join when game started
-        /*
-         if (game.hasStarted() || gameLoopJob?.isActive == true) {
-                    // then KICK the player
-                    println("Kicking ${player.name} from game.")
-                    emit(session, GameEvent(GameEventType.KICK, ""))
-                    return
-                }
-        */
-
+        // if late joiner, tell player game has started
         if (game.hasStarted()) {
             emitStartToSession(session)
         }
