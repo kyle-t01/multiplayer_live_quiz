@@ -40,6 +40,35 @@ export const GlobalContextProvider = ({ children }) => {
         sendGameEvent("ANSWER", i);
     }
 
+    // handle create game, using similar logic to handlePlayerJoin for now
+    const handleCreateGame = () => {
+        if (!playerName.trim()) return;
+
+        // attempt connection
+        if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
+            socketRef.current = new WebSocket(`ws://${window.location.hostname}:8080/quiz`);
+        }
+        // establish connection
+        socketRef.current.onopen = () => {
+            console.log('websocket open!');
+            console.log(`${playerName} attempting to create a new Room`)
+            const data = { playerName: playerName, roomCode: "" }
+            sendGameEvent('create', data);
+        };
+        // receive message
+        socketRef.current.onmessage = (message) => {
+            handleGameEventMessage(message);
+        };
+        // error
+        socketRef.current.onerror = (e) => {
+            console.log('websocket error!', e);
+        };
+        // disconnect
+        socketRef.current.onclose = () => {
+            console.log('websocket disconnected!');
+        };
+    }
+
     // when the player joins the lobby, open connection to websocket
     const handlePlayerJoin = () => {
         if (!playerName.trim() || !roomCode.trim() || roomCode.length != 4) return;
@@ -145,6 +174,7 @@ export const GlobalContextProvider = ({ children }) => {
                 sendGameEvent,
                 handleStartGame,
                 handlePlayerJoin,
+                handleCreateGame,
                 handleUserAnswer,
             }}>
             {children}

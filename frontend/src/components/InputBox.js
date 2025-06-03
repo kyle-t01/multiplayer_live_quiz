@@ -4,7 +4,7 @@ import { GlobalVars } from "../context/GlobalContext";
 const InputBox = () => {
 
     // global state
-    const { playerName, setPlayerName, roomCode, setRoomCode, handlePlayerJoin, hasJoined } = GlobalVars();
+    const { playerName, setPlayerName, roomCode, setRoomCode, handlePlayerJoin, handleCreateGame, hasJoined } = GlobalVars();
 
     const maxChars = 10;
     const maxCodesize = 4;
@@ -34,7 +34,10 @@ const InputBox = () => {
                 maxLength={maxCodesize}
             />
             <button className="button" onClick={handlePlayerJoin}>
-                Connect to Room
+                Connect to Game Room
+            </button>
+            <button className="button" onClick={handleCreateGame}>
+                Create Game Room
             </button>
         </div>
     );
