@@ -2,7 +2,7 @@ package com.example.multiplayerquizgame.model
 
 enum class GameEventType {
     JOIN, // player (already connected to game) is ready to join/start
-    CONNECT, // player attempting to connect to a game lobby
+    CREATE, // player attempting to created a new game room
     LOBBY_UPDATE, // update lobby information
     START, // game has started
     END, // game has ended
