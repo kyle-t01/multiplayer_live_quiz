@@ -7,16 +7,43 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.springframework.web.socket.WebSocketSession
+import kotlin.random.Random
 
 class GameLoopController(private val lobby: Lobby,
-                         private val game: Game,
                          private val emitter: Emitter
 )
 {
     // track gameLoop coroutine
+    private val game: Game = Game()
     private val gameLoopScope: CoroutineScope = CoroutineScope(CoroutineName("GameLoopScope"))
     private var gameLoopJob: Job? = null
+    private val roomCode: String = generateRoomCode()
 
+    companion object {
+        // generate ID (not unique)
+        fun generateRoomCode(): String{
+            val id = Random.nextInt(0,10000).toString().padStart(GAME_ID_LENGTH,'0')
+            return id
+        }
+        val GAME_ID_LENGTH = 4
+
+    }
+
+    /**
+     * Get room code
+     *
+     * @return
+     */
+    fun getRoomCode(): String {
+        return roomCode
+    }
+
+    /**
+     * Handle game event
+     *
+     * @param session
+     * @param gameEvent
+     */
     fun handleGameEvent(session: WebSocketSession, gameEvent: GameEvent) {
         val type = gameEvent.type
         val data = gameEvent.data

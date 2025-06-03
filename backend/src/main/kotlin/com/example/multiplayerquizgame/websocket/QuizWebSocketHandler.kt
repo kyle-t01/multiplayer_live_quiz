@@ -5,10 +5,6 @@ import com.example.multiplayerquizgame.controller.Emitter
 import com.example.multiplayerquizgame.controller.GameLoopController
 import com.example.multiplayerquizgame.model.*
 import com.example.multiplayerquizgame.util.JsonMapper
-import com.example.multiplayerquizgame.util.TimerService
-
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import kotlinx.coroutines.*
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.socket.CloseStatus
 import org.springframework.web.socket.TextMessage
@@ -21,7 +17,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 
 class QuizWebSocketHandler (private val mapper:JsonMapper, private val lobby: Lobby, private val emitter: Emitter) : TextWebSocketHandler() {
 
-    private val gameLoop: GameLoopController = GameLoopController(lobby, Game(), emitter)
+    private val gameLoop: GameLoopController = GameLoopController(lobby, emitter)
 
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
