@@ -216,7 +216,7 @@ class GameLoopController(private val lobby: Lobby,
      *
      */
     fun emitLobbyUpdate() {
-        val event = GameEvent(GameEventType.LOBBY_UPDATE, lobby.getPlayers())
+        val event = GameEvent(GameEventType.LOBBY_UPDATE, game.getPlayers())
         emitToGameLobby(event)
     }
 
