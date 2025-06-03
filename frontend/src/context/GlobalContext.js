@@ -11,6 +11,7 @@ export const GlobalContextProvider = ({ children }) => {
     const [hasJoined, setHasJoined] = useState(false);
     const [lobby, setLobby] = useState([]);
     const [hasGameStarted, setHasGameStarted] = useState(false);
+    const [hasGameEnded, setHasGameEnded] = useState(false);
     const [question, setQuestion] = useState(null);
     const [userAnswer, setUserAnswer] = useState(null);
     const [isShowAnswer, setIsShowAnswer] = useState(false);
@@ -91,10 +92,12 @@ export const GlobalContextProvider = ({ children }) => {
                 break;
             case "START":
                 setHasGameStarted(true);
+                setHasGameEnded(false);
                 console.log("Starting or Joining an existing game!");
                 break;
             case "END":
                 setHasGameStarted(false);
+                setHasGameEnded(true);
                 setUserAnswer(null);
                 setIsShowAnswer(false)
                 setQuestion(null)
