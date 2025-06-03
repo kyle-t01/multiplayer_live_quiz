@@ -2,9 +2,9 @@ import { GlobalVars } from "../context/GlobalContext";
 const TimerBar = () => {
 
     // global state
-    const { timeLeft, totalTime, hasGameStarted } = GlobalVars();
+    const { timeLeft, totalTime, hasGameStarted, question } = GlobalVars();
 
-    if (!hasGameStarted) return;
+    if (!question) return;
 
     return (
         <div className="timer-bar">
