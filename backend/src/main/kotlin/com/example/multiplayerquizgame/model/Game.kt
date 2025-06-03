@@ -36,6 +36,7 @@ class Game()
         isStarted = false
         isEnded = true
         // reset quiz
+        // don't clear questions, just reset it to start
         quiz.endQuiz()
     }
 
@@ -65,7 +66,7 @@ class Game()
      * @return added player to game, and whether can be added
      */
     fun addPlayer(player: Player?): Boolean {
-        if (player == null || isStarted) return false
+        if (player == null) return false
 
         // attempted to add a duplicate
         if (players.contains(player)) return false

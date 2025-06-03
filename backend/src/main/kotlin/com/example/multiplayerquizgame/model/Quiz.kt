@@ -74,7 +74,7 @@ class Quiz() {
 
     // end Quiz, reset to default state
     fun endQuiz(){
-        questionList.clear()
+        // questionList.clear()
         currentIndex = 0
     }
 
