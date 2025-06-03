@@ -43,10 +43,7 @@ export const GlobalContextProvider = ({ children }) => {
     // when the player joins the lobby, open connection to websocket
     const handlePlayerJoin = () => {
         if (!playerName.trim() || !roomCode.trim() || roomCode.length != 4) return;
-        // close existing socket
-        if (socketRef.current) {
-            socketRef.current.close();
-        }
+
         // attempt connection
         if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
             socketRef.current = new WebSocket(`ws://${window.location.hostname}:8080/quiz`);
@@ -121,7 +118,6 @@ export const GlobalContextProvider = ({ children }) => {
                 setHasJoined(false)
                 // check if player has been KICKED
                 console.log("You were KICKED from the game!");
-                alert("A game is already in progress, wait for it to finish before joining!");
                 socketRef.current.close();
                 break;
             case "ANSWER":
