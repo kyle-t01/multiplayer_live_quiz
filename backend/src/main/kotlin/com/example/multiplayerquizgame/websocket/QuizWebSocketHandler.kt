@@ -3,6 +3,7 @@ package com.example.multiplayerquizgame.websocket
 // models:
 import com.example.multiplayerquizgame.controller.Emitter
 import com.example.multiplayerquizgame.controller.GameLoopController
+import com.example.multiplayerquizgame.controller.GameSessionController
 import com.example.multiplayerquizgame.model.*
 import com.example.multiplayerquizgame.util.JsonMapper
 import org.springframework.context.annotation.Configuration
@@ -17,11 +18,11 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 
 class QuizWebSocketHandler (private val mapper:JsonMapper, private val lobby: Lobby, private val emitter: Emitter) : TextWebSocketHandler() {
 
-    private val gameLoop: GameLoopController = GameLoopController(lobby, emitter)
+    private val gameController: GameSessionController = GameSessionController(lobby, emitter)
 
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
-        gameLoop.handleDisconnect(session)
+        gameController.handleConnectionClosed(session)
     }
 
     // handle game events
@@ -35,7 +36,7 @@ class QuizWebSocketHandler (private val mapper:JsonMapper, private val lobby: Lo
         println("$type: $data")
 
         // have gameLoop handle game events messages
-        gameLoop.handleGameEvent(session, gameEvent)
+        gameController.handleGameEventTraffic(session, gameEvent)
     }
 }
 
