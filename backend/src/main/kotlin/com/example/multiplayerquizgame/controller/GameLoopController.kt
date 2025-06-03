@@ -2,6 +2,7 @@ package com.example.multiplayerquizgame.controller
 
 import com.example.multiplayerquizgame.model.*
 import com.example.multiplayerquizgame.util.TimerService
+import com.fasterxml.jackson.databind.JsonNode
 import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -49,6 +50,7 @@ class GameLoopController(private val lobby: Lobby,
         val type = gameEvent.type
         val data = gameEvent.data
 
+
         when(type) {
             GameEventType.JOIN -> handleJoin(session, gameEvent)
             GameEventType.START -> handleStart(session, gameEvent)
@@ -66,11 +68,21 @@ class GameLoopController(private val lobby: Lobby,
      * @param gameEvent
      */
     fun handleJoin(session: WebSocketSession, gameEvent: GameEvent) {
-        val type = gameEvent.type
-        val data = gameEvent.data
-        // for now, add player to lobby and game
-        // TODO: player should JOIN via lobby ID
-        val player = Player(data.toString())
+        // extract data
+        val jsonData = gameEvent.data as JsonNode
+        val code = jsonData.get("roomCode")?.asText() ?: ""
+        // does room code match?
+        if (!code.equals(roomCode)) {
+            // no, so don't allow join
+            println("roomCode did not match")
+            // kick session
+            emitter.emit(session, GameEvent(GameEventType.KICK, ""))
+            return
+        }
+        // add player to game lobby
+        val name = jsonData.get("playerName")?.asText() ?: "Joining..."
+        val player = Player(name)
+
         lobby.addToPlayers(session, player)
         game.addPlayer(player)
 
