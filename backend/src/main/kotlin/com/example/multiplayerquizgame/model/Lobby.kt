@@ -35,4 +35,10 @@ class Lobby(
         return players.entries.find{ it.value == player}?.key
     }
 
+    fun getRoomCodeFromSession(session: WebSocketSession): String? {
+        val player = getPlayerFromSession(session)
+        val code = player?.roomCode
+        return code
+    }
+
 }
