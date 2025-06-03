@@ -81,8 +81,8 @@ class GameLoopController(private val lobby: Lobby,
         }
         // add player to game lobby
         val name = jsonData.get("playerName")?.asText() ?: "Joining..."
-        val player = Player(name)
-
+        val player = Player(name, 0, roomCode)
+        println("$player")
         lobby.addToPlayers(session, player)
         game.addPlayer(player)
 
