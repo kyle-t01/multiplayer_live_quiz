@@ -28,7 +28,6 @@ code {
   justify-content: flex-start;
   border-radius: 8px;
   border: 1px dotted rgb(0, 0, 0);
-
 }
 
 .selected-option {
@@ -132,4 +131,59 @@ code {
   margin: 0;
   padding: 0;
   font-size: 25px;
+}
+
+/* input box */
+.input-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border-radius: 10px;
+  width: 300px;
+  margin-top: 3rem;
+}
+
+.char-counter {
+  font-size: 0.75rem;
+  color: #ccc;
+  align-self: center;
+  margin-bottom: 0.5rem;
+}
+
+.button {
+  width: 100%;
+  padding: 0.6rem;
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.button:hover {
+  background-color: #3e8e41;
+}
+
+.input-box h2 {
+  margin-bottom: 1rem;
+  color: rgb(20, 18, 18);
+  text-align: center;
+}
+
+.input {
+  width: 100%;
+  max-width: 250px;
+  padding: 10px 14px;
+  margin: 6px 0;
+  font-size: 16px;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #bbb;
+  background-color: #d9cfcf;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
 }
