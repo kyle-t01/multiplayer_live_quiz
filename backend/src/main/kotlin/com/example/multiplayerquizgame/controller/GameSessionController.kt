@@ -5,8 +5,11 @@ import com.example.multiplayerquizgame.model.GameEvent
 import com.example.multiplayerquizgame.model.GameEventType
 import com.example.multiplayerquizgame.model.Lobby
 import com.fasterxml.jackson.databind.JsonNode
+import org.springframework.stereotype.Component
+import org.springframework.stereotype.Service
 import org.springframework.web.socket.WebSocketSession
 
+@Service
 class GameSessionController (private val lobby: Lobby, private val emitter: Emitter) {
 
     // goal of class is to

@@ -16,9 +16,12 @@ import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry
 import org.springframework.web.socket.handler.TextWebSocketHandler
 
 
-class QuizWebSocketHandler (private val mapper:JsonMapper, private val lobby: Lobby, private val emitter: Emitter) : TextWebSocketHandler() {
-
-    private val gameController: GameSessionController = GameSessionController(lobby, emitter)
+class QuizWebSocketHandler (
+    private val mapper:JsonMapper,
+    private val lobby: Lobby,
+    private val emitter: Emitter,
+    private val gameController: GameSessionController
+) : TextWebSocketHandler() {
 
     // remove player from lobby on disconnect
     override fun afterConnectionClosed(session: WebSocketSession, status: CloseStatus) {
@@ -42,10 +45,14 @@ class QuizWebSocketHandler (private val mapper:JsonMapper, private val lobby: Lo
 
 @Configuration
 @EnableWebSocket
-class WSConfig(private val mapper:JsonMapper, private val lobby: Lobby, private val emitter: Emitter): WebSocketConfigurer {
+class WSConfig(private val mapper:JsonMapper,
+               private val lobby: Lobby,
+               private val emitter: Emitter,
+               private val gameController: GameSessionController
+): WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         registry
-            .addHandler(QuizWebSocketHandler(mapper, lobby, emitter), "/quiz")
+            .addHandler(QuizWebSocketHandler(mapper, lobby, emitter, gameController), "/quiz")
             .setAllowedOrigins("*")
     }
 }
