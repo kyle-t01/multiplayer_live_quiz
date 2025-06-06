@@ -4,18 +4,34 @@ import com.example.multiplayerquizgame.model.GameEvent
 import com.example.multiplayerquizgame.util.JsonMapper
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.listener.ChannelTopic
+import org.springframework.data.redis.listener.PatternTopic
 import org.springframework.stereotype.Component
 
-@Component
-class RedisMessagePublisher(
-    private val redisTemplate: RedisTemplate<String, Any>,
-    private val topic: ChannelTopic,
-    private val mapper: JsonMapper
-) {
-    fun publish(event: GameEvent) {
-        val data = mapper.convertToTextMessage(event)
-        println("attempting to publish $data to $topic")
-        println("should call convert and send")
-        redisTemplate.convertAndSend(topic.topic, data)
+    @Component
+    class RedisMessagePublisher(
+        private val redisTemplate: RedisTemplate<String, Any>,
+    ) {
+        /**
+         * Publish to room
+         *
+         * @param roomCode
+         * @param event
+         */
+        fun publishToRoom(roomCode: String, event: GameEvent) {
+            val topic = "game-room:$roomCode"
+            println("publishing to [$topic]")
+            redisTemplate.convertAndSend(topic, event)
+        }
+
+        /**
+         * Publish to player
+         *
+         * @param playerID
+         * @param event
+         */
+        fun publishToPlayer(playerID: String, event: GameEvent) {
+            val topic = "player-id:$playerID"
+            println("publishing to [$topic]")
+            redisTemplate.convertAndSend(topic, event)
+        }
     }
-}
