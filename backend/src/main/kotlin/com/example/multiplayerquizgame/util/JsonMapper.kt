@@ -2,6 +2,7 @@ package com.example.multiplayerquizgame.util
 
 import com.example.multiplayerquizgame.model.GameEvent
 import com.example.multiplayerquizgame.model.GameEventType
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.TextMessage
@@ -26,4 +27,16 @@ class JsonMapper {
         val json = mapper.writeValueAsString(gameEvent)
         return TextMessage(json)
     }
+
+    // covert from jsonString to GameEvent
+    fun convertStrToGameEvent(str: String): GameEvent {
+        val json = mapper.readTree(str)
+        val typeStr = json.get("type").asText().uppercase()
+        val type = GameEventType.valueOf(typeStr)
+        val data = json.get("data")
+        return GameEvent(type, data)
+    }
+
+
+
 }
