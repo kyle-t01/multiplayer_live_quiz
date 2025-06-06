@@ -95,6 +95,17 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         }
     }
 
+    // from a player to a (external) room
+    fun handleRedisRoomEvent(id: String, gameEvent: GameEvent) {
+        println("got room event [$id]: $gameEvent")
+    }
+
+    // from room to a (external) player
+    fun handleRedisPlayerEvent(id: String, gameEvent: GameEvent) {
+        println("got player event [$id]: $gameEvent")
+    }
+
+
     companion object {
         val MAX_GAMES = 3
     }
