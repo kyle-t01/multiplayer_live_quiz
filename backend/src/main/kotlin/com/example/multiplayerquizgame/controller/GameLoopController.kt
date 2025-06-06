@@ -61,17 +61,26 @@ class GameLoopController(private val lobby: Lobby,
 
     fun handleCreate(session: WebSocketSession, gameEvent: GameEvent) {
         // pretty much the same code as handleJoin() but doesn't check room code
-        val jsonData = gameEvent.data as JsonNode
-
-        // create player
-        val name = jsonData.get("playerName")?.asText() ?: "Joining..."
-        val player = Player(name, 0, roomCode)
+        val player = newPlayerFromGameEvent(gameEvent)
         lobby.addToPlayers(session, player)
         game.addPlayer(player)
-
         // emit signals
         emitter.emit(session, GameEvent(GameEventType.JOIN, player))
         emitLobbyUpdate()
+    }
+
+    /**
+     * New player from game event
+     *
+     * @param gameEvent
+     * @return
+     */
+    private fun newPlayerFromGameEvent(gameEvent: GameEvent): Player {
+        // TODO: refactor this with mapper class
+        val jsonData = gameEvent.data as JsonNode
+        val name = jsonData.get("playerName")?.asText() ?: "Joining..."
+        val code = jsonData.get("roomCode")?.asText() ?: ""
+        return Player(name, 0, code)
     }
 
     /**
@@ -84,20 +93,15 @@ class GameLoopController(private val lobby: Lobby,
      */
     fun handleJoin(session: WebSocketSession, gameEvent: GameEvent) {
         // extract data
-        val jsonData = gameEvent.data as JsonNode
-        val code = jsonData.get("roomCode")?.asText() ?: ""
+        val player = newPlayerFromGameEvent(gameEvent)
         // does room code match?
-        if (!code.equals(roomCode)) {
+        if (!player.roomCode.equals(roomCode)) {
             // no, so don't allow join
             println("roomCode did not match")
             // kick session
             emitter.emit(session, GameEvent(GameEventType.KICK, ""))
             return
         }
-        // add player to game lobby
-        val name = jsonData.get("playerName")?.asText() ?: "Joining..."
-        val player = Player(name, 0, roomCode)
-        println("$player")
         lobby.addToPlayers(session, player)
         game.addPlayer(player)
 
