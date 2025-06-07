@@ -41,7 +41,7 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         return games.find {it.getRoomCode() == roomCode}
     }
 
-    fun handleGameEventTraffic(session: WebSocketSession, gameEvent: GameEvent) {
+    fun handleInternalGameEventTraffic(session: WebSocketSession, gameEvent: GameEvent) {
         // when creating or joining a game, not possible to associate session with game
         val type = gameEvent.type
         val jsonData = gameEvent.data as JsonNode
@@ -77,6 +77,18 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
 
     }
 
+
+    fun handleExternalGameEventTraffic(topic: String, gameEvent: GameEvent) {
+        val topicParts = getTopicParts(topic)
+        val prefix = topicParts[0]
+        val id = topicParts[1]
+        when(prefix) {
+            "game-room" -> handleRedisRoomEvent(id, gameEvent)
+            "player-id" -> handleRedisPlayerEvent(id, gameEvent)
+            else -> println("unknown topic prefix: $prefix")
+        }
+    }
+
     fun handleConnectionClosed(session: WebSocketSession) {
         // find game associated with session
         val game = findGameRoomFromSession(session)
@@ -94,15 +106,30 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
             games.remove(game)
         }
     }
+    // handle external game events
+
 
     // from a player to a (external) room
     fun handleRedisRoomEvent(id: String, gameEvent: GameEvent) {
         println("got room event [$id]: $gameEvent")
+        // find the room where event is being sent to
+        val game = findGameRoomFromRoomCode(id)
+
     }
 
-    // from room to a (external) player
+    // from (external) room to a player
     fun handleRedisPlayerEvent(id: String, gameEvent: GameEvent) {
         println("got player event [$id]: $gameEvent")
+    }
+
+    // get the components of topic
+    private fun getTopicParts(topic: String): List<String> {
+        val parts = topic.split(":")
+        if (parts.size != 2) {
+            println("topic format invalid $topic")
+            return listOf("","")
+        }
+        return parts
     }
 
 

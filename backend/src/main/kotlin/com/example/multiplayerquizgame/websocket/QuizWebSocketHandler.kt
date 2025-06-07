@@ -36,10 +36,10 @@ class QuizWebSocketHandler (
         val data = gameEvent.data
 
         // print game events sent by players to terminal
-        println("$type: $data")
+        // println("$type: $data")
 
         // have gameLoop handle game events messages
-        gameController.handleGameEventTraffic(session, gameEvent)
+        gameController.handleInternalGameEventTraffic(session, gameEvent)
     }
 }
 

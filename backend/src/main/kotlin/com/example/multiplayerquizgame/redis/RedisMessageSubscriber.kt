@@ -29,34 +29,16 @@ class RedisMessageSubscriber(
             // ie: raw data
             val bodyMessage = message.body.decodeToString()
             println("this was the message received: [$topic]:$bodyMessage")
-            // extract topic
-            val topicParts = getTopicParts(topic)
-            val prefix = topicParts[0]
-            val id = topicParts[1]
             // handle body
             val gameEvent = mapper.convertStrToGameEvent(bodyMessage)
-            println("gameEvent: $gameEvent")
-            // handle message
-            when (prefix) {
-                "game-room" -> gameSessionController.handleRedisRoomEvent(id,gameEvent)
-                "player-id" -> gameSessionController.handleRedisPlayerEvent(id, gameEvent)
-                else -> println("unknown $prefix")
-            }
-
-
+            // pass event to game session controller
+            gameSessionController.handleExternalGameEventTraffic(topic, gameEvent)
 
         }catch (e: Exception) {
             println("Error: ${e.message}")
         }
     }
 
-    private fun getTopicParts(topic: String): List<String> {
-        val parts = topic.split(":")
-        if (parts.size != 2) {
-            println("topic format invalid $topic")
-            return listOf("","")
-        }
-        return parts
-    }
+
 
 }
