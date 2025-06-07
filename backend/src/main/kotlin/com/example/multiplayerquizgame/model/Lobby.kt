@@ -41,4 +41,15 @@ class Lobby(
         return code
     }
 
+    /**
+     * Get player by ID
+     *
+     * @param id
+     * @return
+     */
+    fun getPlayerByID(id: String): Player? {
+        val player = getPlayers().find{ it.getID() == id }
+        return player
+    }
+
 }
