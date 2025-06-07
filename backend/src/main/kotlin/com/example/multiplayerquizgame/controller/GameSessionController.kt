@@ -1,9 +1,6 @@
 package com.example.multiplayerquizgame.controller
 
-import com.example.multiplayerquizgame.model.Game
-import com.example.multiplayerquizgame.model.GameEvent
-import com.example.multiplayerquizgame.model.GameEventType
-import com.example.multiplayerquizgame.model.Lobby
+import com.example.multiplayerquizgame.model.*
 import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
@@ -46,10 +43,16 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         val type = gameEvent.type
         val jsonData = gameEvent.data as JsonNode
         var game: GameLoopController? = null
+        var player: Player? = lobby.getPlayerFromSession(session)
         when(type) {
             GameEventType.CREATE -> {
                 // create game
                 game = createGame()
+                if (game == null) return
+                // create player
+                player = newPlayerFromGameEvent(gameEvent)
+                lobby.addToPlayers(session, player)
+                println("creating... $player")
             }
             GameEventType.JOIN -> {
                 // find game by roomCode
@@ -59,24 +62,22 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
                 if (game == null) {
                     println("Room code $roomCode did not match any games!")
                     emitter.emit(session, GameEvent(GameEventType.KICK, ""))
+                    return
                 }
+                player = newPlayerFromGameEvent(gameEvent)
+                player.roomCode = game.getRoomCode()
+                lobby.addToPlayers(session, player)
             }
             else -> {
                 // find game by session
                 game = findGameRoomFromSession(session)
             }
         }
-        // could we find the game?
-        if (game == null) {
-            // no, just return
-            return
-        }
-        // otherwise, handle game event
-        game.handleGameEvent(session, gameEvent)
+        if (game == null || player == null) return
+        // handle game event
+        game.handleGameEvent(player, gameEvent)
         return
-
     }
-
 
     fun handleExternalGameEventTraffic(topic: String, gameEvent: GameEvent) {
         val topicParts = getTopicParts(topic)
@@ -84,11 +85,14 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         val id = topicParts[1]
         when(prefix) {
             "game-room" -> handleRedisRoomEvent(id, gameEvent)
-            "player-id" -> handleRedisPlayerEvent(id, gameEvent)
+            "player-id" -> handleRedisPlayerEvent(id, gameEvent) // emit directly to player
             else -> println("unknown topic prefix: $prefix")
         }
     }
 
+
+    // merge together
+    // fun handleGameEventTraffic
     fun handleConnectionClosed(session: WebSocketSession) {
         // find game associated with session
         val game = findGameRoomFromSession(session)
@@ -132,6 +136,19 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         return parts
     }
 
+    /**
+     * New player from game event
+     *
+     * @param gameEvent
+     * @return
+     */
+    private fun newPlayerFromGameEvent(gameEvent: GameEvent): Player {
+        // TODO: refactor this with mapper class
+        val jsonData = gameEvent.data as JsonNode
+        val name = jsonData.get("playerName")?.asText() ?: "Joining..."
+        val code = jsonData.get("roomCode")?.asText() ?: ""
+        return Player(name, 0, code)
+    }
 
     companion object {
         val MAX_GAMES = 3
