@@ -9,6 +9,7 @@ const InputBox = () => {
     const maxChars = 10;
     const maxCodesize = 4;
 
+    if (hasJoined) return;
     return (
         <div className="input-box" hidden={hasJoined}>
             <h2>Join Quiz Lobby Here</h2>
