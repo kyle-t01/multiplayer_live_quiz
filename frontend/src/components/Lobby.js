@@ -33,7 +33,7 @@ const Lobby = () => {
                 {lobby.map((p, i) => renderPlayerCard(p, i))}
             </div>
 
-            <button className="button" onClick={handleStartGame} hidden={hasGameStarted}>
+            <button className="start-button" onClick={handleStartGame} hidden={hasGameStarted}>
                 Start Quiz
             </button>
         </div>
