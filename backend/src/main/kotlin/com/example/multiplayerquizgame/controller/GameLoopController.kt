@@ -46,42 +46,34 @@ class GameLoopController(private val lobby: Lobby,
      * @param session
      * @param gameEvent
      */
-    fun handleGameEvent(session: WebSocketSession, gameEvent: GameEvent) {
+    fun handleGameEvent(player: Player, gameEvent: GameEvent) {
         val type = gameEvent.type
-        val data = gameEvent.data
 
         when(type) {
-            GameEventType.CREATE -> handleCreate(session, gameEvent)
-            GameEventType.JOIN -> handleJoin(session, gameEvent)
-            GameEventType.START -> handleStart(session, gameEvent)
-            GameEventType.ANSWER -> handleAnswer(session, gameEvent)
-            else -> println("unexpected usage of ${gameEvent}!")
+            GameEventType.CREATE -> handleCreate(player, gameEvent)
+            GameEventType.JOIN -> handleJoin(player, gameEvent)
+            GameEventType.START -> handleStart(player, gameEvent)
+            GameEventType.ANSWER -> handleAnswer(player, gameEvent)
+            else -> println("$player unexpected usage of ${gameEvent}!")
         }
     }
 
-    fun handleCreate(session: WebSocketSession, gameEvent: GameEvent) {
-        // pretty much the same code as handleJoin() but doesn't check room code
-        val player = newPlayerFromGameEvent(gameEvent)
-        lobby.addToPlayers(session, player)
+    /**
+     * Handle create
+     *
+     * @param player
+     * @param gameEvent
+     */
+    fun handleCreate(player: Player, gameEvent: GameEvent) {
+        player.roomCode = getRoomCode()
         game.addPlayer(player)
+        val event = GameEvent(GameEventType.JOIN, player)
         // emit signals
-        emitter.emit(session, GameEvent(GameEventType.JOIN, player))
+        emitter.emitToPlayer(player, event)
         emitLobbyUpdate()
     }
 
-    /**
-     * New player from game event
-     *
-     * @param gameEvent
-     * @return
-     */
-    private fun newPlayerFromGameEvent(gameEvent: GameEvent): Player {
-        // TODO: refactor this with mapper class
-        val jsonData = gameEvent.data as JsonNode
-        val name = jsonData.get("playerName")?.asText() ?: "Joining..."
-        val code = jsonData.get("roomCode")?.asText() ?: ""
-        return Player(name, 0, code)
-    }
+
 
     /**
      * Handle join
@@ -91,27 +83,25 @@ class GameLoopController(private val lobby: Lobby,
      * @param session
      * @param gameEvent
      */
-    fun handleJoin(session: WebSocketSession, gameEvent: GameEvent) {
-        // extract data
-        val player = newPlayerFromGameEvent(gameEvent)
+    fun handleJoin(player: Player, gameEvent: GameEvent) {
         // does room code match?
         if (!player.roomCode.equals(roomCode)) {
             // no, so don't allow join
             println("roomCode did not match")
             // kick session
-            emitter.emit(session, GameEvent(GameEventType.KICK, ""))
+            val kickEvent = GameEvent(GameEventType.KICK,"")
+            emitter.emitToPlayer(player, kickEvent)
             return
         }
-        lobby.addToPlayers(session, player)
         game.addPlayer(player)
 
         // if late joiner, tell player game has started
         if (game.hasStarted()) {
-            emitStartToSession(session)
+            emitStartToPlayer(player)
         }
 
         // emit signals
-        emitter.emit(session, GameEvent(GameEventType.JOIN, player))
+        emitter.emitToPlayer(player, GameEvent(GameEventType.JOIN, player))
         emitLobbyUpdate()
     }
 
@@ -121,13 +111,14 @@ class GameLoopController(private val lobby: Lobby,
      * @param session
      * @param gameEvent
      */
-    fun handleStart(session: WebSocketSession, gameEvent: GameEvent) {
+    fun handleStart(player: Player, gameEvent: GameEvent) {
         // if started and not yet ended
         if (game.hasStarted()) {
             println("Game is already in progress...")
             return
         }
         // start the game
+        println("${player.name} started game for ${player.roomCode}")
         game.start()
 
         // update the initial score of all players
@@ -190,14 +181,13 @@ class GameLoopController(private val lobby: Lobby,
         return
     }
 
-    fun handleAnswer(session: WebSocketSession, gameEvent: GameEvent) {
+    fun handleAnswer(player: Player, gameEvent: GameEvent) {
         // TODO: multiple player answers
         val ans: Int = gameEvent.data.toString().toInt()
         // validate
-        val playerThatAnswered = lobby.getPlayerFromSession(session)
-        game.validatePlayerAnswer(playerThatAnswered, ans)
+        game.validatePlayerAnswer(player, ans)
         // give feedback
-        emitAnswer(session)
+        emitAnswer(player)
         // broadcast state change to everyone
         emitLobbyUpdate()
         return
@@ -220,7 +210,7 @@ class GameLoopController(private val lobby: Lobby,
      *
      */
     fun emitLobbyUpdate() {
-        val event = GameEvent(GameEventType.LOBBY_UPDATE, game.getPlayers())
+        val event = GameEvent(GameEventType.LOBBY_UPDATE, getCurrentPlayers())
         emitToGameLobby(event)
     }
 
@@ -234,15 +224,13 @@ class GameLoopController(private val lobby: Lobby,
     }
 
     /**
-     * Emit start to session
-     *
-     * Tell player a game has already started when join
+     * Emit start to player
      *
      * @param session
      */
-    fun emitStartToSession(session: WebSocketSession) {
+    fun emitStartToPlayer(player: Player) {
         val event = GameEvent(GameEventType.START, "")
-        emitter.emit(session,event)
+        emitter.emitToPlayer(player,event)
     }
 
     /**
@@ -297,11 +285,10 @@ class GameLoopController(private val lobby: Lobby,
      * Emit answer
      *
      */
-    fun emitAnswer(session: WebSocketSession) {
-        //  TODO: should be player's answer
+    fun emitAnswer(player: Player) {
         val data = game.getCurrentAnswer()
         val event = GameEvent(GameEventType.ANSWER, data)
-        emitter.emit(session, event)
+        emitter.emitToPlayer(player, event)
     }
 
     /**
@@ -320,7 +307,7 @@ class GameLoopController(private val lobby: Lobby,
      * @param event
      */
     private fun emitToGameLobby(event: GameEvent) {
-        emitter.emitToAll(getPlayerSessions(), event)
+        emitter.emitToAllPlayers(getCurrentPlayers(), event)
     }
 
     fun handleDisconnect(session: WebSocketSession) {
