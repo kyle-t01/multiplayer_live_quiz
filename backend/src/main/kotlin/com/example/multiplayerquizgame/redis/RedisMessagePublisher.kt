@@ -12,25 +12,27 @@ import org.springframework.stereotype.Component
         private val redisTemplate: RedisTemplate<String, Any>,
     ) {
         /**
-         * Publish to room
+         * Publish to room (player-room communication)
          *
          * @param roomCode
          * @param event
          */
-        fun publishToRoom(roomCode: String, event: GameEvent) {
-            val topic = "game-room:$roomCode"
+        fun publishToRoom(playerID: String, roomCode: String, event: GameEvent) {
+            val topicPrefix = "player-room"
+            val topic = "$topicPrefix:$playerID:$roomCode"
             println("publishing to [$topic]")
             redisTemplate.convertAndSend(topic, event)
         }
 
         /**
-         * Publish to player
+         * Publish to player (room-player communication)
          *
          * @param playerID
          * @param event
          */
-        fun publishToPlayer(playerID: String, event: GameEvent) {
-            val topic = "player-id:$playerID"
+        fun publishToPlayer(roomCode: String, playerID: String, event: GameEvent) {
+            val topicPrefix = "room-player"
+            val topic = "room-player:$roomCode:$playerID"
             println("publishing to [$topic]")
             redisTemplate.convertAndSend(topic, event)
         }
