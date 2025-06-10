@@ -5,9 +5,12 @@ import com.fasterxml.jackson.databind.JsonNode
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.WebSocketSession
+import java.util.*
 
 @Service
 class GameSessionController (private val lobby: Lobby, private val emitter: Emitter) {
+
+    private val id:String = UUID.randomUUID().toString()
 
     // goal of class is to
     // create and delete new games
@@ -79,17 +82,23 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         return
     }
 
-    fun handleExternalGameEventTraffic(topic: String, gameEvent: GameEvent) {
+    /**
+     * Handle external game event traffic (from redis pub/sub events)
+     *
+     * @param topic
+     * @param message
+     */
+    fun handleExternalGameEventTraffic(topic: String, message: String) {
         val topicParts = getTopicParts(topic)
         val prefix = topicParts[0]
-        val id = topicParts[1]
+        val type = topicParts[1]
         when(prefix) {
-            "game-room" -> handleRedisRoomEvent(id, gameEvent)
-            "player-id" -> handleRedisPlayerEvent(id, gameEvent) // emit directly to player
-            else -> println("unknown topic prefix: $prefix")
+            "server-broadcast" -> {
+                println("[$prefix:<$type>]: server $message just started up!")
+            }
+            else -> println("unknown topic: $prefix:<$type> => $message")
         }
     }
-
 
     // merge together
     // fun handleGameEventTraffic
@@ -109,21 +118,6 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
             println("game with ${game.getRoomCode()} removed due to empty lobby")
             games.remove(game)
         }
-    }
-    // handle external game events
-
-
-    // from a player to a (external) room
-    fun handleRedisRoomEvent(id: String, gameEvent: GameEvent) {
-        println("got room event [$id]: $gameEvent")
-        // find the room where event is being sent to
-        val game = findGameRoomFromRoomCode(id)
-
-    }
-
-    // from (external) room to a player
-    fun handleRedisPlayerEvent(id: String, gameEvent: GameEvent) {
-        println("got player event [$id]: $gameEvent")
     }
 
     // get the components of topic
@@ -149,6 +143,8 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         val code = jsonData.get("roomCode")?.asText() ?: ""
         return Player(name, 0, code)
     }
+
+    fun getID()= id
 
     companion object {
         val MAX_GAMES = 3
