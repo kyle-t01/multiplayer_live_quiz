@@ -2,6 +2,9 @@ package com.example.multiplayerquizgame.controller
 
 import com.example.multiplayerquizgame.model.*
 import com.fasterxml.jackson.databind.JsonNode
+import jakarta.annotation.PostConstruct
+import org.springframework.boot.context.event.ApplicationReadyEvent
+import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.WebSocketSession
@@ -11,12 +14,16 @@ import java.util.*
 class GameSessionController (private val lobby: Lobby, private val emitter: Emitter) {
 
     private val id:String = UUID.randomUUID().toString()
-
-    // goal of class is to
-    // create and delete new games
-    // handle any signals to games
-    // manage a list of games
     val games: MutableList<GameLoopController> = mutableListOf()
+
+    @EventListener(ApplicationReadyEvent::class)
+    fun onInit() {
+        // on init (after beans active), broadcast "server:<id> says HELLO-WORLD!"
+        println("GameSessionController init...")
+        val msg = "$id"
+        emitter.emitServerBroadcast(msg)
+    }
+
 
     fun createGame(): GameLoopController? {
         if (games.size >= MAX_GAMES) {
@@ -94,7 +101,7 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         val type = topicParts[1]
         when(prefix) {
             "server-broadcast" -> {
-                println("[$prefix:<$type>]: server $message just started up!")
+                println("[$prefix:<$type>]: <$message> started up!")
             }
             else -> println("unknown topic: $prefix:<$type> => $message")
         }
