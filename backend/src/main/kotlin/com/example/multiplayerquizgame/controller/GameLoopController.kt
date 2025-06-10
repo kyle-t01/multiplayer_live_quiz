@@ -87,9 +87,9 @@ class GameLoopController(private val lobby: Lobby,
         // does room code match?
         if (!player.roomCode.equals(roomCode)) {
             // no, so don't allow join
-            println("roomCode did not match")
+            println("Error: roomCode did not match, this should not be possible")
             // kick session
-            val kickEvent = GameEvent(GameEventType.KICK,"")
+            val kickEvent = GameEvent(GameEventType.KICK,"ERROR: invalid room code")
             emitter.emitToPlayer(player, kickEvent)
             return
         }

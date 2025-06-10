@@ -64,8 +64,9 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
                 game = createGame()
                 // can't create game, then KICK (at full capacity)
                 if (game == null) {
-                    println("Server at full capacity!")
-                    emitter.emit(session, GameEvent(GameEventType.KICK, ""))
+                    val kickReason = "Server at full capacity, no more games can be created!"
+                    println(kickReason)
+                    emitter.emit(session, GameEvent(GameEventType.KICK, kickReason))
                 }
                 // create player
                 player = newPlayerFromGameEvent(gameEvent)
@@ -77,8 +78,9 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
                 game = findGameRoomFromRoomCode(roomCode)
                 // can't find game, then KICK
                 if (game == null) {
-                    println("Room code $roomCode did not match any games!")
-                    emitter.emit(session, GameEvent(GameEventType.KICK, ""))
+                    val kickReason = "Room code $roomCode did not match any games!"
+                    println(kickReason)
+                    emitter.emit(session, GameEvent(GameEventType.KICK, kickReason))
                     return
                 }
                 player = newPlayerFromGameEvent(gameEvent)
