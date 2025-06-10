@@ -24,21 +24,14 @@ class RedisMessageSubscriber(
      */
     override fun onMessage(message: Message, pattern: ByteArray?) {
         try {
-            // ie: game-room:1234
+            // ie: server-broadcast:all
             val topic = message.channel.decodeToString()
             // ie: raw data
             val bodyMessage = message.body.decodeToString()
-            println("this was the message received: [$topic]:$bodyMessage")
-            // handle body
-            val gameEvent = mapper.convertStrToGameEvent(bodyMessage)
-            // pass event to game session controller
-            gameSessionController.handleExternalGameEventTraffic(topic, gameEvent)
+            gameSessionController.handleExternalGameEventTraffic(topic, bodyMessage)
 
         }catch (e: Exception) {
             println("Error: ${e.message}")
         }
     }
-
-
-
 }

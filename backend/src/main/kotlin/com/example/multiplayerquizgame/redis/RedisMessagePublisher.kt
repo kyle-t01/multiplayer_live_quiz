@@ -11,29 +11,19 @@ import org.springframework.stereotype.Component
     class RedisMessagePublisher(
         private val redisTemplate: RedisTemplate<String, Any>,
     ) {
-        /**
-         * Publish to room (player-room communication)
-         *
-         * @param roomCode
-         * @param event
-         */
-        fun publishToRoom(playerID: String, roomCode: String, event: GameEvent) {
-            val topicPrefix = "player-room"
-            val topic = "$topicPrefix:$playerID:$roomCode"
-            println("publishing to [$topic]")
-            redisTemplate.convertAndSend(topic, event)
-        }
 
         /**
-         * Publish to player (room-player communication)
+         * Publish to all (server-broadcast:<type>)
          *
-         * @param playerID
-         * @param event
+         * @param message
          */
-        fun publishToPlayer(roomCode: String, playerID: String, event: GameEvent) {
-            val topicPrefix = "room-player"
-            val topic = "room-player:$roomCode:$playerID"
-            println("publishing to [$topic]")
-            redisTemplate.convertAndSend(topic, event)
+        fun publishToAll(message: String) {
+            val topic = "$SERVER_BROADCAST_TOPIC:<all>"
+            println("publishing to [$topic] with [$message]")
+            redisTemplate.convertAndSend(topic, message)
         }
+        companion object {
+            val SERVER_BROADCAST_TOPIC = "server-broadcast"
+        }
+
     }
