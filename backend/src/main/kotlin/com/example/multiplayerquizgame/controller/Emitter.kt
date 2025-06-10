@@ -15,7 +15,6 @@ class Emitter(private val mapper: JsonMapper,
               private val publisher: RedisMessagePublisher
 )
 {
-    // send data to sessions
     /**
      * Emit signal to a player
      *
@@ -68,6 +67,15 @@ class Emitter(private val mapper: JsonMapper,
         // session not found
         println("websocket session not found for $player:$event")
 
+    }
+
+    /**
+     * Emit server broadcast
+     *
+     * @param message
+     */
+    fun emitServerBroadcast(message: String) {
+        publisher.publishToAll(message)
     }
 
 }
