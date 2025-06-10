@@ -62,11 +62,14 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
             GameEventType.CREATE -> {
                 // create game
                 game = createGame()
-                if (game == null) return
+                // can't create game, then KICK (at full capacity)
+                if (game == null) {
+                    println("Server at full capacity!")
+                    emitter.emit(session, GameEvent(GameEventType.KICK, ""))
+                }
                 // create player
                 player = newPlayerFromGameEvent(gameEvent)
                 lobby.addToPlayers(session, player)
-                println("creating... $player")
             }
             GameEventType.JOIN -> {
                 // find game by roomCode
@@ -87,6 +90,7 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
                 game = findGameRoomFromSession(session)
             }
         }
+
         if (game == null || player == null) return
         // handle game event
         game.handleGameEvent(player, gameEvent)
