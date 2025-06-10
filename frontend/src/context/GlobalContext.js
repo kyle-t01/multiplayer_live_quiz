@@ -5,6 +5,8 @@ import { useContext, createContext, useState, useRef } from "react";
 const GlobalContext = createContext();
 
 export const GlobalContextProvider = ({ children }) => {
+    const local = `ws://${window.location.hostname}:8080/quiz`
+    const test = `ws://${window.location.hostname}:30080/quiz`
 
     const socketRef = useRef(null);
     const [playerName, setPlayerName] = useState("");
@@ -46,7 +48,7 @@ export const GlobalContextProvider = ({ children }) => {
 
         // attempt connection
         if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-            socketRef.current = new WebSocket(`ws://${window.location.hostname}:8080/quiz`);
+            socketRef.current = new WebSocket(local);
         }
         // establish connection
         socketRef.current.onopen = () => {
@@ -75,7 +77,7 @@ export const GlobalContextProvider = ({ children }) => {
 
         // attempt connection
         if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-            socketRef.current = new WebSocket(`ws://${window.location.hostname}:8080/quiz`);
+            socketRef.current = new WebSocket(test);
         }
         // establish connection
         socketRef.current.onopen = () => {
