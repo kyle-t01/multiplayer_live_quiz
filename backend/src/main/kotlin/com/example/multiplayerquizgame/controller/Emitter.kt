@@ -42,26 +42,22 @@ class Emitter(private val mapper: JsonMapper,
     /**
      * Emit to all players
      *
-     * Emit to local websocket session, else use redis pub/sub
      *
      * @param players
      * @param event
      */
     fun emitToAllPlayers(players: List<Player>, event: GameEvent){
         for (p in players) {
-            val s = lobby.getSessionFromPlayer(p)
-            if (s != null) {
-                emit(s, event)
-                continue
-            }
-            // can not find session, must be external player
-            println("session not found, using redis pub/sub")
-            //publisher.publish(event)
+            emitToPlayer(p, event)
         }
-
     }
 
-    // emit to a player (whether local or external)
+    /**
+     * Emit to player
+     *
+     * @param player
+     * @param event
+     */
     fun emitToPlayer(player: Player, event: GameEvent) {
         val session = lobby.getSessionFromPlayer(player)
         if (session != null) {
@@ -69,8 +65,8 @@ class Emitter(private val mapper: JsonMapper,
             emit(session, event)
             return
         }
-        // handle external player via redis pub/sub
-        publisher.publishToPlayer(player.getID(), event)
+        // session not found
+        println("websocket session not found for $player:$event")
 
     }
 
