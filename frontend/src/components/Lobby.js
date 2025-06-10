@@ -5,6 +5,7 @@ const Lobby = () => {
 
     // global state
     const { playerName, handleStartGame, hasGameStarted, hasJoined, lobby } = GlobalVars();
+    const roomCode = lobby[0]?.roomCode
 
     if (!hasJoined) return;
     const renderPlayerCard = (p, i) => {
@@ -28,6 +29,7 @@ const Lobby = () => {
 
     return (
         <div>
+            <h2>Room Code {roomCode}</h2>
             <h2>Active Players</h2>
             <div className="lobby">
                 {lobby.map((p, i) => renderPlayerCard(p, i))}
