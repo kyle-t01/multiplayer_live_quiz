@@ -77,7 +77,7 @@ export const GlobalContextProvider = ({ children }) => {
 
         // attempt connection
         if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-            socketRef.current = new WebSocket(test);
+            socketRef.current = new WebSocket(local);
         }
         // establish connection
         socketRef.current.onopen = () => {
