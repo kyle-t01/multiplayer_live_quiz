@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
     @Component
     class RedisMessagePublisher(
-        private val redisTemplate: RedisTemplate<String, Any>,
+        private val redisTemplate: RedisTemplate<String, Any>?,
     ) {
 
         /**
@@ -18,6 +18,12 @@ import org.springframework.stereotype.Component
          * @param message
          */
         fun publishToAll(message: String) {
+            if (redisTemplate == null) {
+                println("redis pub/sub offline, can not publish")
+                return
+            }
+
+
             val topic = "$SERVER_BROADCAST_TOPIC:<all>"
             println("publishing to [$topic] with [$message]")
             redisTemplate.convertAndSend(topic, message)

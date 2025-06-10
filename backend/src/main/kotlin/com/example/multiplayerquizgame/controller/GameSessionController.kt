@@ -20,8 +20,12 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
     fun onInit() {
         // on init (after beans active), broadcast "server:<id> says HELLO-WORLD!"
         println("GameSessionController init...")
-        val msg = "$id"
-        emitter.emitServerBroadcast(msg)
+        val msg = id
+        try {
+            emitter.emitServerBroadcast(msg)
+        } catch (e: Exception) {
+            println("Redis emit failed: ${e.message}")
+        }
     }
 
 
