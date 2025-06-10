@@ -25,13 +25,9 @@ class RedisConfig {
         template.setDefaultSerializer(GenericJackson2JsonRedisSerializer())
         return template
     }
-    // from player to room, ie player-room:playerID:roomCode
+    // broadcast to other servers
     @Bean
-    fun playerRoomPattern() = PatternTopic("room-player:*")
-
-    // from room to player, ie room-player:roomCode:playerID
-    @Bean
-    fun roomPlayerPattern() = PatternTopic("player-room:*")
+    fun serverBroadcastTopic() = PatternTopic("server-broadcast:*")
 
     @Bean
     fun messageListenerAdapter(subscriber: RedisMessageSubscriber): MessageListener = MessageListenerAdapter(subscriber)
@@ -40,14 +36,12 @@ class RedisConfig {
     fun redisContainer(
         connectionFactory: RedisConnectionFactory,
         messageListener: MessageListenerAdapter,
-        @Qualifier("playerRoomPattern") roomPatternTopic: PatternTopic,
-        @Qualifier("roomPlayerPattern") playerPatternTopic: PatternTopic
+        @Qualifier("serverBroadcastTopic") serverBroadcastTopic: PatternTopic,
     ): RedisMessageListenerContainer {
         val container: RedisMessageListenerContainer = RedisMessageListenerContainer();
         container.apply {
             setConnectionFactory(connectionFactory)
-            addMessageListener(messageListener, roomPatternTopic)
-            addMessageListener(messageListener, playerPatternTopic)
+            addMessageListener(messageListener, serverBroadcastTopic)
         }
         return container
     }
