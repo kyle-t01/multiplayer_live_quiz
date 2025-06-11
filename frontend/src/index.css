@@ -63,7 +63,8 @@ code {
   width: 150px;
 
   text-align: center;
-
+  margin-right: 5px;
+  margin-bottom: 5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -80,7 +81,8 @@ code {
   width: 150px;
 
   text-align: center;
-
+  margin-right: 5px;
+  margin-bottom: 5px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -89,6 +91,12 @@ code {
 .self-player-card p {
   margin: 0.25rem 0;
 }
+
+.gold {
+  outline: 3px solid gold;
+  box-shadow: 0 0 10px gold;
+}
+
 
 .question {
   user-select: none;
