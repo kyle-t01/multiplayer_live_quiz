@@ -27,15 +27,15 @@ const Lobby = () => {
 
     return (
         <div>
-            <h2>Room Code {roomCode}</h2>
-            <h2>Active Players</h2>
+            <p className="room-code">Room {roomCode}</p>
+            <h3>Active Players</h3>
             <div className="lobby">
                 {sortedPlayers.map((p, i) => renderPlayerCard(p, i))}
             </div>
-
             <button className="start-button" onClick={handleStartGame} hidden={hasGameStarted}>
                 Start Quiz
             </button>
+
         </div>
     );
 }
