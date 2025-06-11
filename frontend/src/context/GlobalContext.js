@@ -150,6 +150,8 @@ export const GlobalContextProvider = ({ children }) => {
                 // check if player has been KICKED
                 console.log("You were KICKED from the game!");
                 socketRef.current.close();
+                const kickMessage = gameEvent.data
+                alert(kickMessage)
                 break;
             case "ANSWER":
                 console.log("Your answer was received!");
