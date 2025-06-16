@@ -1,6 +1,7 @@
 package com.example.multiplayerquizgame.controller
 
 import com.example.multiplayerquizgame.model.*
+import com.example.multiplayerquizgame.redis.RedisGameRoomRegistry
 import com.fasterxml.jackson.databind.JsonNode
 import jakarta.annotation.PostConstruct
 import org.springframework.boot.context.event.ApplicationReadyEvent
@@ -8,10 +9,15 @@ import org.springframework.context.event.EventListener
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Service
 import org.springframework.web.socket.WebSocketSession
+import java.net.InetAddress
 import java.util.*
 
 @Service
-class GameSessionController (private val lobby: Lobby, private val emitter: Emitter) {
+class GameSessionController (
+    private val lobby: Lobby,
+    private val emitter: Emitter,
+    private val gameRoomRegistry: RedisGameRoomRegistry
+) {
 
     private val id:String = UUID.randomUUID().toString()
     val games: MutableList<GameLoopController> = mutableListOf()
@@ -39,6 +45,9 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         val game = GameLoopController(lobby, emitter)
         games.add(game)
         println("game ${game.getRoomCode()} created")
+        // register room
+        println("GameSessionController attempting to register ${game.getRoomCode()}")
+        gameRoomRegistry.registerGameRoom(game.getRoomCode(), getPodName())
         return game
     }
 
@@ -133,6 +142,7 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
         if (game.hasNoPlayers()) {
             // no players, game needs to be removed
             println("game with ${game.getRoomCode()} removed due to empty lobby")
+            gameRoomRegistry.unregisterGameRoom(game.getRoomCode())
             games.remove(game)
         }
     }
@@ -162,6 +172,11 @@ class GameSessionController (private val lobby: Lobby, private val emitter: Emit
     }
 
     fun getID()= id
+
+    fun getPodName(): String {
+        val name = InetAddress.getLocalHost().hostName
+        return name
+    }
 
     companion object {
         val MAX_GAMES = 3
