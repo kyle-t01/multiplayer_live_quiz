@@ -25,8 +25,8 @@ class GameSessionController (
     @EventListener(ApplicationReadyEvent::class)
     fun onInit() {
         // on init (after beans active), broadcast "server:<id> says HELLO-WORLD!"
-        println("GameSessionController init...")
-        val msg = id
+        println("[onInit()] GameSessionController init...")
+        val msg = getPodName()
         try {
             emitter.emitServerBroadcast(msg)
         } catch (e: Exception) {
@@ -174,12 +174,14 @@ class GameSessionController (
     fun getID()= id
 
     fun getPodName(): String {
-        val name = InetAddress.getLocalHost().hostName
+        val name = System.getenv("HOSTNAME") ?: ""
+        val idx = name.substringAfterLast("-")
+        println("name is $name with idx of $idx")
         return name
     }
 
     companion object {
-        val MAX_GAMES = 3
+        val MAX_GAMES = 1
     }
 
 
