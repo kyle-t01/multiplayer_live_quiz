@@ -1,0 +1,50 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: quiz-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/websocket-services: "backend-service-0,backend-service-1,backend-service-2,gateway-service"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+spec:
+  rules:
+  - host: localhost
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: frontend-service
+            port:
+              number: 80
+      - path: /gateway
+        pathType: Prefix
+        backend:
+          service:
+            name: gateway-service
+            port:
+              number: 8080
+      - path: /quiz/0
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service-0
+            port:
+              number: 8080
+      - path: /quiz/1
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service-1
+            port:
+              number: 8080
+      - path: /quiz/2
+        pathType: Prefix
+        backend:
+          service:
+            name: backend-service-2
+            port:
+              number: 8080
