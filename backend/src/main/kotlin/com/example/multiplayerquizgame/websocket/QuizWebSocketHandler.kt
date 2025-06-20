@@ -51,8 +51,18 @@ class WSConfig(private val mapper:JsonMapper,
                private val gameController: GameSessionController
 ): WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
+        val podName = System.getenv("HOSTNAME") ?: ""
+
+        val idx = podName.substringAfterLast("-")
+        var path = ""
+        if (podName == "") {
+            path = "/quiz"
+        } else {
+            path = "/quiz/$idx"
+        }
+        println("[WSConfig] name: $podName, path: $path")
         registry
-            .addHandler(QuizWebSocketHandler(mapper, lobby, emitter, gameController), "/quiz")
+            .addHandler(QuizWebSocketHandler(mapper, lobby, emitter, gameController), path)
             .setAllowedOrigins("*")
     }
 }
