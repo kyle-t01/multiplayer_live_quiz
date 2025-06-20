@@ -5,8 +5,12 @@ import { useContext, createContext, useState, useRef } from "react";
 const GlobalContext = createContext();
 
 export const GlobalContextProvider = ({ children }) => {
-    const local = `ws://${window.location.hostname}:8080/quiz`
-    const test = `ws://${window.location.hostname}:30080/quiz`
+
+    const isDev = window.location.port === "3000";
+    const local = isDev
+        ? `ws://${window.location.hostname}:8080/quiz`
+        : `ws://${window.location.host}/quiz`;
+    const gateway = `ws://${window.location.hostname}:8080/gateway`
 
     const socketRef = useRef(null);
     const [playerName, setPlayerName] = useState("");
@@ -22,13 +26,20 @@ export const GlobalContextProvider = ({ children }) => {
     const [totalTime, setTotalTime] = useState(0);
     // ie: sendEvent(STRING, Object)
     const sendGameEvent = (type, data) => {
+        const gameEvent = makeGameEvent(type, data);
+        socketRef.current.send(JSON.stringify(gameEvent));
+        console.log(`sent a game event: ${type}: ${data}`);
+    }
+
+
+    const makeGameEvent = (type, data) => {
         const gameEvent = {
             type: type.toUpperCase(),
             data: data,
         };
-        socketRef.current.send(JSON.stringify(gameEvent));
-        console.log(`sent a game event: ${type}: ${data}`);
+        return gameEvent
     }
+
     const handleStartGame = () => {
         sendGameEvent("START", "");
     }
@@ -45,11 +56,28 @@ export const GlobalContextProvider = ({ children }) => {
     // handle create game, using similar logic to handlePlayerJoin for now
     const handleCreateGame = () => {
         if (!playerName.trim()) return;
+        // attempt connection to gateway
+        const type = "CREATE"
+        const data = { playerName: playerName, roomCode: "" }
+        const gameEvent = makeGameEvent(type, data)
+        connectToGateWay(gateway, gameEvent)
+    }
 
-        // attempt connection
-        if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-            socketRef.current = new WebSocket(local);
-        }
+    // when the player joins the lobby, open connection to websocket
+    const handlePlayerJoin = () => {
+        if (!playerName.trim() || !roomCode.trim() || roomCode.length != 4) return;
+        // attempt connection to gateway
+        const type = "JOIN"
+        const data = { playerName: playerName, roomCode: roomCode }
+        const gameEvent = makeGameEvent(type, data)
+        connectToGateWay(gateway, gameEvent)
+    };
+
+    const handleCreateRedirect = (wsLink) => {
+        // est connection
+        socketRef.current = new WebSocket(`${local}/${wsLink}`);
+        console.log(`${local}/${wsLink}`)
+        // TODO: close the original gateway ws connection
         // establish connection
         socketRef.current.onopen = () => {
             console.log('websocket open!');
@@ -71,15 +99,13 @@ export const GlobalContextProvider = ({ children }) => {
         };
     }
 
-    // when the player joins the lobby, open connection to websocket
-    const handlePlayerJoin = () => {
-        if (!playerName.trim() || !roomCode.trim() || roomCode.length != 4) return;
 
-        // attempt connection
-        if (!socketRef.current || socketRef.current.readyState === WebSocket.CLOSED) {
-            socketRef.current = new WebSocket(local);
-        }
+    // join redirect
+    const handleJoinRedirect = (wsLink) => {
         // establish connection
+        socketRef.current = new WebSocket(`${local}/${wsLink}`);
+        console.log(`${local}/${wsLink}`)
+        // TODO: close the original gateway ws connection
         socketRef.current.onopen = () => {
             console.log('websocket open!');
             console.log(`${playerName} attempting to join lobby with code ${roomCode}`)
@@ -98,7 +124,32 @@ export const GlobalContextProvider = ({ children }) => {
         socketRef.current.onclose = () => {
             console.log('websocket disconnected!');
         };
-    };
+    }
+
+
+    // connect to gateway
+    const connectToGateWay = (wsLink, gameEvent) => {
+        const ws = new WebSocket(wsLink);
+        // on connection
+        ws.onopen = () => {
+            console.log(`websocket to ${wsLink} open!`);
+            // send event
+            ws.send(JSON.stringify(gameEvent))
+            console.log("sent a game event to gateway!")
+        }
+        // receive message
+        ws.onmessage = (message) => {
+            handleGameEventMessage(message);
+        };
+        // error
+        ws.onerror = (e) => {
+            console.log('websocket error!', e);
+        };
+        // disconnect
+        ws.onclose = () => {
+            console.log('websocket disconnected!');
+        };
+    }
 
     // messages sent from the game server
     const handleGameEventMessage = (message) => {
@@ -106,6 +157,19 @@ export const GlobalContextProvider = ({ children }) => {
         console.log("server sent GameEvent:");
         console.log(gameEvent);
         switch (gameEvent.type) {
+            case "REDIRECT":
+                console.log("ERROR, incorrect redirect type!")
+                break;
+            case "REDIRECT_CREATE":
+                const backendCreateName = gameEvent.data
+                console.log("redirect to backend (create): ", backendCreateName)
+                handleCreateRedirect(backendCreateName)
+                break;
+            case "REDIRECT_JOIN":
+                const backendJoinName = gameEvent.data
+                console.log("redirect to backend (join): ", backendJoinName)
+                handleJoinRedirect(backendJoinName)
+                break;
             case "TIME":
                 const time = gameEvent.data
                 setTimeLeft(time);
