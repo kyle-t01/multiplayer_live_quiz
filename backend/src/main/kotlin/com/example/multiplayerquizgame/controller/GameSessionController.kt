@@ -26,6 +26,8 @@ class GameSessionController (
     fun onInit() {
         // on init (after beans active), broadcast "server:<id> says HELLO-WORLD!"
         println("[onInit()] GameSessionController init...")
+        // unregister podnames associated with this pod
+        gameRoomRegistry.unregisterAllRoomsOfPod(getPodName())
         val msg = getPodName()
         try {
             emitter.emitServerBroadcast(msg)
@@ -33,6 +35,7 @@ class GameSessionController (
             println("Redis emit failed: ${e.message}")
         }
     }
+
 
 
     fun createGame(): GameLoopController? {
