@@ -184,7 +184,7 @@ class GameSessionController (
     }
 
     companion object {
-        val MAX_GAMES = 1
+        val MAX_GAMES = 2
     }
 
 
