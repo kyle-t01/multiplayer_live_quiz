@@ -1,0 +1,51 @@
+# deployment
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: backend-deployment
+spec:
+  serviceName: "backend"
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: tankaus/backend:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+        env:
+          - name: SPRING_REDIS_HOST
+            value: redis-service
+          - name: SPRING_REDIS_PORT
+            value: "6379"
+---
+# services for each pod
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service-0
+spec:
+  selector:
+    statefulset.kubernetes.io/pod-name: backend-deployment-0
+  ports:
+      - port: 8080
+        targetPort: 8080
+---
+# services for each pod
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service-1
+spec:
+  selector:
+    statefulset.kubernetes.io/pod-name: backend-deployment-1
+  ports:
+    - port: 8080
+      targetPort: 8080
