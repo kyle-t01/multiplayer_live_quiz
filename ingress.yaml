@@ -4,10 +4,10 @@ metadata:
   name: quiz-ingress
   annotations:
     nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/websocket-services: "backend-service-0,backend-service-1,backend-service-2,gateway-service"
-    nginx.ingress.kubernetes.io/proxy-read-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-send-timeout: "60"
-    nginx.ingress.kubernetes.io/proxy-connect-timeout: "60"
+    nginx.ingress.kubernetes.io/websocket-services: "backend-service-0,backend-service-1,gateway-service"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "120"
 spec:
   rules:
   - host: localhost
@@ -39,12 +39,5 @@ spec:
         backend:
           service:
             name: backend-service-1
-            port:
-              number: 8080
-      - path: /quiz/2
-        pathType: Prefix
-        backend:
-          service:
-            name: backend-service-2
             port:
               number: 8080
