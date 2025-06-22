@@ -44,6 +44,30 @@ class RedisGameRoomRegistry (
     }
 
     /**
+     * Unregister all rooms of pod
+     *
+     * @param podName
+     */
+    fun unregisterAllRoomsOfPod(podName: String) {
+        if (!hasRedisConnection()) return
+        val keys = getAllGameRoomKeys() ?: return
+        for (k in keys) {
+            val value = get(k)
+            if (value == podName) {
+                // pod owns this value
+                redisTemplate!!.delete(k)
+                println("deleted key $k for pod $podName")
+            }
+        }
+    }
+
+    private fun getAllGameRoomKeys(): Set<String>? {
+        if (!hasRedisConnection()) return null
+        val keys = redisTemplate!!.keys("$KEY_PREFIX:*") ?: return null
+        return keys
+    }
+
+    /**
      * Has redis connection
      *
      * @return
