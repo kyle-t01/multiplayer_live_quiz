@@ -1,11 +1,11 @@
 services:
   backend:
-    image: tankaus/backend
+    image: tankaus/backend:latest
     ports:
       - "8080:8080"
 
   frontend:
-    image: tankaus/frontend
+    image: tankaus/frontend:latest
     ports:
       - "80:80"
     container_name: "FRONTEND"
