@@ -16,7 +16,7 @@ import java.util.*
 class GameSessionController (
     private val lobby: Lobby,
     private val emitter: Emitter,
-    private val gameRoomRegistry: RedisGameRoomRegistry
+    private val redis: RedisGameRoomRegistry
 ) {
 
     private val id:String = UUID.randomUUID().toString()
@@ -27,7 +27,7 @@ class GameSessionController (
         // on init (after beans active), broadcast "server:<id> says HELLO-WORLD!"
         println("[onInit()] GameSessionController init...")
         // unregister podnames associated with this pod
-        gameRoomRegistry.unregisterAllRoomsOfPod(getPodName())
+        redis.removeAllRoomsOfPod(getPodName())
         val msg = getPodName()
         try {
             emitter.emitServerBroadcast(msg)
@@ -50,7 +50,7 @@ class GameSessionController (
         println("game ${game.getRoomCode()} created")
         // register room
         println("GameSessionController attempting to register ${game.getRoomCode()}")
-        gameRoomRegistry.registerGameRoom(game.getRoomCode(), getPodName())
+        redis.addRoomToPod(game.getRoomCode(), getPodName())
         return game
     }
 
@@ -145,7 +145,7 @@ class GameSessionController (
         if (game.hasNoPlayers()) {
             // no players, game needs to be removed
             println("game with ${game.getRoomCode()} removed due to empty lobby")
-            gameRoomRegistry.unregisterGameRoom(game.getRoomCode())
+            redis.removeRoomFromPod(game.getRoomCode(), getPodName())
             games.remove(game)
         }
     }
