@@ -78,4 +78,8 @@ class Emitter(private val mapper: JsonMapper,
         publisher.publishToAll(message)
     }
 
+    fun emitToGateway(message: String) {
+        publisher.publishToGateway(message)
+    }
+
 }

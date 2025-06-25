@@ -121,11 +121,25 @@ class GameSessionController (
         val topicParts = getTopicParts(topic)
         val prefix = topicParts[0]
         val type = topicParts[1]
-        when(prefix) {
-            "server-broadcast" -> {
-                println("[$prefix:<$type>]: <$message> started up!")
+
+        if (prefix != "server-broadcast") {
+            println("unknown topic: $prefix:$type => $message")
+            return
+        }
+
+        when(type) {
+            "all" -> {
+                println("[$prefix:$type]: <$message> started up!")
             }
-            else -> println("unknown topic: $prefix:<$type> => $message")
+            "ping" -> {
+                println("[$prefix:$type]: got PING, will try to PONG [${getPodName()}]!")
+                emitter.emitToGateway(getPodName())
+            }
+            "pong" -> {
+                // do nothing
+                ;
+            }
+            else -> println("unknown type: $prefix:$type => $message")
         }
     }
 
