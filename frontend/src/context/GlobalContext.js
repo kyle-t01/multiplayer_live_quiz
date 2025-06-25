@@ -10,7 +10,9 @@ export const GlobalContextProvider = ({ children }) => {
     const local = isDev
         ? `ws://${window.location.hostname}:8080/quiz`
         : `ws://${window.location.host}/quiz`;
-    const gateway = `ws://${window.location.hostname}:8080/gateway`
+    const gateway = isDev
+        ? `ws://${window.location.hostname}:8080/quiz`
+        : `ws://${window.location.hostname}:8080/gateway`
 
     const socketRef = useRef(null);
     const [playerName, setPlayerName] = useState("");
