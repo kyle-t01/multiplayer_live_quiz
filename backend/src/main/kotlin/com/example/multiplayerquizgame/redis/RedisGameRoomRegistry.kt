@@ -6,41 +6,31 @@ import org.springframework.stereotype.Service
 class RedisGameRoomRegistry (
     private val redisTemplate: RedisTemplate<String, Any>?
 ){
-    // put <GameRoom, HostName>
+
     /**
-     * Register Game Room
+     * Add game room to pod
+     *
+     * ie: pod-rooms:XXXX -> Set<YYYY,ZZZZ>
      *
      * @param roomCode
      * @param hostStr
      */
-    fun registerGameRoom(roomCode: String, hostStr: String) {
+    fun addRoomToPod(roomCode: String, podName: String) {
         if (!hasRedisConnection()) return
-        insert(roomCode, hostStr)
-        println("Room $roomCode registered to $hostStr")
-
+        println("$podName owns $roomCode")
+        sadd(podName, roomCode)
     }
 
     /**
-     * Get game room host
+     * Remove room from pod
      *
      * @param roomCode
-     * @return
+     * @param podName
      */
-    fun getGameRoomHost(roomCode: String): String? {
-        if (!hasRedisConnection()) return null
-        val host = get(roomCode)
-        return host
-    }
-
-    /**
-     * Unregister Game Room
-     *
-     * @param roomCode
-     */
-    fun unregisterGameRoom(roomCode: String) {
+    fun removeRoomFromPod(roomCode: String, podName: String) {
         if (!hasRedisConnection()) return
-        redisTemplate!!.delete("$KEY_PREFIX:$roomCode")
-        println("Room $roomCode unregistered")
+        println("$podName no longer owns $roomCode")
+        srem(podName, roomCode)
     }
 
     /**
@@ -48,23 +38,13 @@ class RedisGameRoomRegistry (
      *
      * @param podName
      */
-    fun unregisterAllRoomsOfPod(podName: String) {
+    fun removeAllRoomsOfPod(podName: String) {
         if (!hasRedisConnection()) return
-        val keys = getAllGameRoomKeys() ?: return
-        for (k in keys) {
-            val value = get(k)
-            if (value == podName) {
-                // pod owns this value
-                redisTemplate!!.delete(k)
-                println("deleted key $k for pod $podName")
-            }
+        val podSet = smembers(podName)
+        println("removing all rooms of pod $podName")
+        for (member in podSet) {
+            srem(podName, member)
         }
-    }
-
-    private fun getAllGameRoomKeys(): Set<String>? {
-        if (!hasRedisConnection()) return null
-        val keys = redisTemplate!!.keys("$KEY_PREFIX:*") ?: return null
-        return keys
     }
 
     /**
@@ -81,31 +61,83 @@ class RedisGameRoomRegistry (
     }
 
     /**
-     * Insert <K,V> = <game-room:<roomCode>, <value>>
+     * Add to set
      *
-     * @param roomCode
-     * @param value
+     * @param set
+     * @param member
      */
-    private fun insert(roomCode: String, value: String) {
+    private fun sadd(set: String, member: String) {
         if (redisTemplate == null) return
-        redisTemplate.opsForValue().set("$KEY_PREFIX:$roomCode", value)
-        // TODO: need a logger class
-        return
+        redisTemplate.opsForSet().add("$SET_PREFIX:$set", member)
     }
 
     /**
-     * Get owner (host) of given roomCode
+     * Remove from set
      *
-     * @param roomCode
+     * @param set
+     * @param member
+     */
+    private fun srem(set: String, member: String) {
+        if (redisTemplate == null) return
+        redisTemplate.opsForSet().remove("$SET_PREFIX:$set", member)
+    }
+
+    /**
+     * Set membership
+     *
+     * @param set
+     * @param member
      * @return
      */
-    private fun get(roomCode: String): String? {
-        if (redisTemplate == null) return null
-        val result = redisTemplate.opsForValue().get("$KEY_PREFIX:$roomCode") as? String
+    private fun sismember(set: String, member: String): Boolean {
+        if (redisTemplate == null) return false
+        val membership = redisTemplate.opsForSet().isMember("$SET_PREFIX:$set", member)
+        return (membership == true)
+    }
+
+    /**
+     * Size of set
+     *
+     * @param set
+     * @return
+     */
+    private fun scard(set: String): Long {
+        if (redisTemplate == null) return 0L
+        val size = redisTemplate.opsForSet().size("$SET_PREFIX:$set") ?: 0L
+        return size
+    }
+
+    /**
+     * Members of a set
+     *
+     * @param set
+     * @return
+     */
+    private fun smembers(set: String): Set<String> {
+        if (redisTemplate == null) return emptySet()
+        val members = redisTemplate.opsForSet().members("$SET_PREFIX:$set")
+        val result = mutableSetOf<String>()
+        members?.forEach { it ->
+            if (it is String) {
+                result.add(it)
+            }
+        }
         return result
     }
 
+
     companion object {
         val KEY_PREFIX = "game-room"
+        val SET_PREFIX = "pod-rooms"
     }
 }
+
+/**
+ * From Redis Docs
+ * Basic commands
+ * SADD adds a new member to a set.
+ * SREM removes the specified member from the set.
+ * SISMEMBER tests a string for set membership.
+ * SINTER returns the set of members that two or more sets have in common (i.e., the intersection).
+ * SCARD returns the size (a.k.a. cardinality) of a set.
+ */
