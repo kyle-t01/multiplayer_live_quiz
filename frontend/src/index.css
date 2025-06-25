@@ -157,7 +157,10 @@ code {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
-  border-radius: 10px;
+  background-color: #938282;
+  border-radius: 30px;
+  border-color: #2a0707;
+  border: 2px solid #060000;
   width: 300px;
   margin-top: 3rem;
 }
