@@ -5,8 +5,8 @@ import { useContext, createContext, useState, useRef } from "react";
 const GlobalContext = createContext();
 
 export const GlobalContextProvider = ({ children }) => {
-
-    const isDev = window.location.port === "3000";
+    const ec2env = true
+    const isDev = (window.location.port === "3000") || (ec2env == true);
     const local = isDev
         ? `ws://${window.location.hostname}:8080/quiz`
         : `ws://${window.location.host}/quiz`;
@@ -85,7 +85,7 @@ export const GlobalContextProvider = ({ children }) => {
 
     const handleCreateRedirect = (wsLink) => {
         // est connection
-        const ws = (wsLink == null || wsLink == "") ? local : `${local}/${wsLink}`;
+        const ws = (ec2env) ? local : `${local}/${wsLink}`;
         socketRef.current = new WebSocket(ws);
         console.log(`${local}/${wsLink}`)
         // TODO: close the original gateway ws connection
@@ -114,7 +114,7 @@ export const GlobalContextProvider = ({ children }) => {
     // join redirect
     const handleJoinRedirect = (wsLink) => {
         // establish connection
-        const ws = (wsLink == null || wsLink == "") ? local : `${local}/${wsLink}`;
+        const ws = (ec2env) ? local : `${local}/${wsLink}`;
         socketRef.current = new WebSocket(ws);
         console.log(`${local}/${wsLink}`)
         // TODO: close the original gateway ws connection
