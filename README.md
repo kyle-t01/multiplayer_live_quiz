@@ -8,11 +8,6 @@ You can compete in a live real-time quiz with other players in a shared lobby.
 Take a look at the project here:
 [Trivia Night!](http://54.79.146.28)
 
-## Demo Video
-[![Demo Video](assets/gameplay.png)](assets/gameplay.mp4)
-(if video autoplay does not work, see below .gif)
-
-
 ## Purpose
 - learn `Kotlin` development (coming from Java)
 - learn the basics of `Spring Boot` (inversion of control, dependency injection, beans, annotations)
@@ -35,9 +30,15 @@ Take a look at the project here:
 - **Devops CI/CD**: Kubernetes (Minikube), Docker, Docker Compose, AWS EC2, Jenkins
 - **Other**: Bash scripting, SSH, SCP, Redis Pub/Sub, NGINX Ingress
 
-### Gameplay GIF
+### App Screenshots
 
-![Multiplayer Quiz Demo GIF](assets/gameplay.gif)
+Joining a game lobby:
+![Joining](assets/join.png)
+![Lobby](assets/lobby.png)
+
+Playing the game:
+![Gameplay](assets/gameplay.png)
+
 
 ## Jenkins CI/CD Pipeline
 The role of the Jenkins pipeline is to automate deployment to an AWS EC2 instance, whenever code is pushed GitHub repo main branch.
@@ -58,7 +59,7 @@ In terms of how `Kubernetes` was used locally:
 2. `Gateway` queries `Redis` to determine which backend pod owns requested room, otherwise selects least-loaded pod
 3. `Gateway` responds with a redirect path to frontend (/quiz/<id>)
 4. `Frontend` reconnects to new path via `Nginx Ingress`
-5. The connected `backend pod`, (deployed as part of a `Kubernetes StatefulSet`) with 2 replicas), maintains game state and player activity
+5. The connected `backend pod`, (deployed as part of a `Kubernetes StatefulSet` with 2 replicas), maintains game state and player activity
 6. `Redis Pub Sub` is used to propagate whether a `backend pod` is available to `Gateway`
 
 ## Live Project link:
