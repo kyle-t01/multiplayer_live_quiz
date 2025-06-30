@@ -33,12 +33,14 @@ Take a look at the project here:
 ### App Screenshots
 
 Joining a Game Lobby
-<img src="assets/join.png" width="50%"/> 
 
-<img src="assets/lobby.png" width="50%"/>
+<img src="assets/join.png" width="30%"/> 
+
+<img src="assets/lobby.png" width="30%"/>
 
 Playing the Game
-<img src="assets/gameplay.png" width="50%"/>
+
+<img src="assets/gameplay.png" width="60%"/>
 
 
 ## Jenkins CI/CD Pipeline
