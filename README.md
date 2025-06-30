@@ -13,24 +13,26 @@ Take a look at the project here:
 
 
 ## Purpose
-- learn Kotlin development (coming from Java)
-- learn the basics of Spring Boot (inversion of control, dependency injection, beans, annotations)
-- implement WebSockets' real-time persistent connection
-- learn how coroutines work
-- learn about Docker containerisation (Dockerfiles, Docker compose) to improve production workflow
-- implement Jenkins CI/CD pipelines and deploy to AWS EC2
+- learn `Kotlin` development (coming from Java)
+- learn the basics of `Spring Boot` (inversion of control, dependency injection, beans, annotations)
+- implement real-time communications with `WebSockets`
+- learn `Kotlin Coroutines` for concurrency management
+- learn `Docker & Docker Compose` for containerised deployment
+- implement `Jenkins CI/CD` pipelines
+- learn `Redis` Pub/Sub and experiment with `Kubernetes` (Minikube) for scalability
 
 ## Core Features
-- join lobby with a nickname, and late-joiners to game are auto-kicked
-- core game loop (including Quiz Timers) handled by coroutines
-- real time updates (through WebSockets): player scores, players joining and leaving the lobby, Quiz Timers
-- disconnected players don't disrupt the current game
+- create and join game rooms via codes
+- core game loop handled by coroutines
+- real time updates through WebSockets: player activity, scores, and timers
+- disconnected players do not disrupt the current game
+- game rooms are created in least-loaded pods
 
 ## Technologies Used
 - **Backend**: Kotlin + Spring Boot, WebSockets, Kotlin Coroutines
 - **Frontend**: React.js
-- **Devops CI/CD**: Docker, Docker Compose, AWS EC2, Jenkins
-- **Other**: bash scripting, ssh, scp
+- **Devops CI/CD**: Kubernetes (Minikube), Docker, Docker Compose, AWS EC2, Jenkins
+- **Other**: Bash scripting, SSH, SCP, Redis Pub/Sub, NGINX Ingress
 
 ### Gameplay GIF
 
@@ -47,6 +49,17 @@ The role of the Jenkins pipeline is to automate deployment to an AWS EC2 instanc
 6. test whether services are up and running via `docker-compose ps`
 
 
+## Infrastructure Overview and Interaction
+`Kubernetes` was used locally via `Minikube` to experiment via scaling backend Websockets and routing. However, for production deployment on AWS EC2, Docker Compose was used instead due to resource limitations of free tier.
+
+In terms of how `Kubernetes` was used locally:
+1. The `frontend React` connects to `Gateway` (/gateway) via Websocket connection (hosted behind `NGINX Ingress`)
+2. `Gateway` queries `Redis` to determine which backend pod owns requested room, otherwise selects least-loaded pod
+3. `Gateway` responds with a redirect path to frontend (/quiz/<id>)
+4. `Frontend` reconnects to new path via `Nginx Ingress`
+5. The connected `backend pod`, (deployed as part of a `Kubernetes StatefulSet`) with 2 replicas), maintains game state and player activity
+6. `Redis Pub Sub` is used to propagate whether a `backend pod` is available to `Gateway`
+
 ## Live Project link:
 [Multiplayer Live Quiz](http://54.79.146.28)
 
@@ -54,8 +67,8 @@ The role of the Jenkins pipeline is to automate deployment to an AWS EC2 instanc
 
 ```
 1. Open http://54.79.146.28, use multiple tabs for multiplayer testing
-2. Enter name and join the lobby (joining while a Game has started will result in an auto-KICK)
-3. When enough players in the lobby, start the quiz
+2. Enter name and join a game room via a code or create a new room
+3. When enough players in the game room, start the quiz
 4. Questions are timed, and scores are updated real-time
 ```
 
@@ -63,8 +76,3 @@ The role of the Jenkins pipeline is to automate deployment to an AWS EC2 instanc
 After completing this project, I felt the urge to create something more complex and "interactive" than just a simple quiz game.
 So I've started working on my next real-time multiplayer project: Chaos Chess Online, where you could mix and match pieces from different chess games (Xiangqi, Checkers, Chess)!
 You will be able to play against other players, or with a mini-maxing AI!
-
-Have a look at it (work in progress) here:
-[Chaos Chess Online](https://github.com/kyle-t01/chaos_chess_online)
-
-Also, as the next step in learning more about devops practices and tools: explore Kubernetes and Terraform
