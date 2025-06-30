@@ -32,12 +32,13 @@ Take a look at the project here:
 
 ### App Screenshots
 
-Joining a game lobby:
-![Joining](assets/join.png)
-![Lobby](assets/lobby.png)
+Joining a Game Lobby
+<img src="assets/join.png" width="50%"/> 
 
-Playing the game:
-![Gameplay](assets/gameplay.png)
+<img src="assets/lobby.png" width="50%"/>
+
+Playing the Game
+<img src="assets/gameplay.png" width="50%"/>
 
 
 ## Jenkins CI/CD Pipeline
