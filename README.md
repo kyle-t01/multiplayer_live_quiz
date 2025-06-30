@@ -1,11 +1,12 @@
-# Multiplayer Live Quiz Demo: A Kotlin + Spring Boot WebSockets Project
+# Trivia Night!: A Kotlin + Spring Boot WebSockets Project
 
-This is a real-time multiplayer quiz app built with **Kotlin**, **Spring Boot**, and **WebSockets**.
-It is containerised with **Docker** and **Docker Compose**, and deployed via a Jenkins CI/CD pipeline to an AWS EC2 instance.
+This is a real-time multiplayer quiz app built with `Kotlin`, `Spring Boot`, and `WebSockets`.
+It is containerised with `Docker`, and deployed via a `Jenkins` CI/CD pipeline to an AWS `EC2` instance.
+It uses `Redis` for backend coordination, and `Kubernetes` (Minikube) for scaling.
 You can compete in a live real-time quiz with other players in a shared lobby.
 
 Take a look at the project here:
-[Multiplayer Live Quiz](http://54.79.146.28)
+[Trivia Night!](http://54.79.146.28)
 
 ## Demo Video
 [![Demo Video](assets/gameplay.png)](assets/gameplay.mp4)
