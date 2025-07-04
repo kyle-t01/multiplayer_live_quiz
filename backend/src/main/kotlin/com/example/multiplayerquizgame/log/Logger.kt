@@ -1,5 +1,7 @@
 package com.example.multiplayerquizgame.log
+import org.springframework.dao.DataAccessException
 import org.springframework.stereotype.Component
+import java.time.format.DateTimeFormatter
 
 // for now, Logger will be used as a singleton class accessible by everyone
 @Component
@@ -34,21 +36,28 @@ class Logger (
     }
 
     private fun getCurrentTime(): String {
-        return java.time.LocalDateTime.now().toString()
+        return java.time.LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
     }
 
     private fun formattedLog(category: String, podName: String?, roomCode: String?, timestamp: String, details: String?) {
         println("$category, $podName, $roomCode, $timestamp, $details")
         // save to database
-        repo.save(
-            LogEntry(
-            category = category,
-            podName = podName,
-            roomCode = roomCode,
-            timeStamp = timestamp,
-            details = details
+        try {
+            repo.save(
+                LogEntry(
+                    category = category,
+                    podName = podName,
+                    roomCode = roomCode,
+                    timeStamp = timestamp,
+                    details = details
+                )
             )
-        )
+        } catch (e: DataAccessException) {
+            println("[Logger] DB unavailable!")
+        } catch (e: Exception) {
+            println("[Logger] unexpected DB error!")
+        }
+
     }
 
 
