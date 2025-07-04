@@ -1,5 +1,6 @@
 package com.example.multiplayerquizgame.controller
 
+import com.example.multiplayerquizgame.log.Logger
 import com.example.multiplayerquizgame.model.*
 import com.example.multiplayerquizgame.redis.RedisGameRoomRegistry
 import com.fasterxml.jackson.databind.JsonNode
@@ -32,7 +33,7 @@ class GameSessionController (
         try {
             emitter.emitServerBroadcast(msg)
         } catch (e: Exception) {
-            println("Redis emit failed: ${e.message}")
+            Logger.logPod(null, "redis offline")
         }
     }
 
@@ -41,13 +42,13 @@ class GameSessionController (
     fun createGame(): GameLoopController? {
         if (games.size >= MAX_GAMES) {
             // EXCEED max games
-            println("Too many games, currently ${games.size}")
+            Logger.logPod(null, "Too many games, currently ${games.size}")
             return null
         }
         // else, add the game
         val game = GameLoopController(lobby, emitter)
         games.add(game)
-        println("game ${game.getRoomCode()} created")
+        Logger.logGL(game.getRoomCode(), "created game")
         // register room
         println("GameSessionController attempting to register ${game.getRoomCode()}")
         redis.addRoomToPod(game.getRoomCode(), getPodName())
@@ -77,7 +78,7 @@ class GameSessionController (
                 // can't create game, then KICK (at full capacity)
                 if (game == null) {
                     val kickReason = "Server at full capacity, no more games can be created!"
-                    println(kickReason)
+                    Logger.logGL(null, kickReason)
                     emitter.emit(session, GameEvent(GameEventType.KICK, kickReason))
                 }
                 // create player
@@ -91,7 +92,7 @@ class GameSessionController (
                 // can't find game, then KICK
                 if (game == null) {
                     val kickReason = "Room code $roomCode did not match any games!"
-                    println(kickReason)
+                    Logger.logGL(null, kickReason)
                     emitter.emit(session, GameEvent(GameEventType.KICK, kickReason))
                     return
                 }
@@ -123,23 +124,23 @@ class GameSessionController (
         val type = topicParts[1]
 
         if (prefix != "server-broadcast") {
-            println("unknown topic: $prefix:$type => $message")
+            Logger.logPod(null, "unknown topic: $prefix:$type => $message")
             return
         }
 
         when(type) {
             "all" -> {
-                println("[$prefix:$type]: <$message> started up!")
+                Logger.logPod(null,"[$prefix:$type]: <$message> started up!")
             }
             "ping" -> {
-                println("[$prefix:$type]: got PING, will try to PONG [${getPodName()}]!")
+                Logger.logPod(null,"[$prefix:$type]: got PING, will try to PONG [${getPodName()}]!")
                 emitter.emitToGateway(getPodName())
             }
             "pong" -> {
                 // do nothing
                 ;
             }
-            else -> println("unknown type: $prefix:$type => $message")
+            else -> Logger.logPod(null, "unknown type: $prefix:$type => $message")
         }
     }
 
@@ -158,7 +159,7 @@ class GameSessionController (
         // if there are no players in the game, can safely remove it
         if (game.hasNoPlayers()) {
             // no players, game needs to be removed
-            println("game with ${game.getRoomCode()} removed due to empty lobby")
+            Logger.logGL(game.getRoomCode(), "${game.getRoomCode()} removed due to empty lobby")
             redis.removeRoomFromPod(game.getRoomCode(), getPodName())
             games.remove(game)
         }
