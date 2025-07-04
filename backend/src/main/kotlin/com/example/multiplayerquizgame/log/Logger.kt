@@ -3,7 +3,9 @@ import org.springframework.stereotype.Component
 
 // for now, Logger will be used as a singleton class accessible by everyone
 @Component
-class Logger {
+class Logger (
+    private val repo: LogEntryRepo
+){
     // There are three types of logs
     // (1) Websocket logs - websocket GameEvents sent to backend gameLoop by player
     // (2) Backend Pod logs - redis, pod init logs, inter-pod communications
@@ -35,9 +37,20 @@ class Logger {
         return java.time.LocalDateTime.now().toString()
     }
 
-    private fun formattedLog(category: String, podName: String?, roomCode: String?, timestamp: String?, details: String?) {
+    private fun formattedLog(category: String, podName: String?, roomCode: String?, timestamp: String, details: String?) {
         println("$category, $podName, $roomCode, $timestamp, $details")
         // save to database
+        repo.save(
+            LogEntry(
+            category = category,
+            podName = podName,
+            roomCode = roomCode,
+            timeStamp = timestamp,
+            details = details
+            )
+        )
     }
+
+
 
 }
