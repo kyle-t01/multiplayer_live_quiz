@@ -4,6 +4,7 @@ package com.example.multiplayerquizgame.websocket
 import com.example.multiplayerquizgame.controller.Emitter
 import com.example.multiplayerquizgame.controller.GameLoopController
 import com.example.multiplayerquizgame.controller.GameSessionController
+import com.example.multiplayerquizgame.log.Logger
 import com.example.multiplayerquizgame.model.*
 import com.example.multiplayerquizgame.util.JsonMapper
 import org.springframework.context.annotation.Configuration
@@ -18,8 +19,6 @@ import org.springframework.web.socket.handler.TextWebSocketHandler
 
 class QuizWebSocketHandler (
     private val mapper:JsonMapper,
-    private val lobby: Lobby,
-    private val emitter: Emitter,
     private val gameController: GameSessionController
 ) : TextWebSocketHandler() {
 
@@ -46,14 +45,12 @@ class QuizWebSocketHandler (
 @Configuration
 @EnableWebSocket
 class WSConfig(private val mapper:JsonMapper,
-               private val lobby: Lobby,
-               private val emitter: Emitter,
                private val gameController: GameSessionController
 ): WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         val path = getPath()
         registry
-            .addHandler(QuizWebSocketHandler(mapper, lobby, emitter, gameController), path)
+            .addHandler(QuizWebSocketHandler(mapper, gameController), path)
             .setAllowedOrigins("*")
     }
 
@@ -69,7 +66,7 @@ class WSConfig(private val mapper:JsonMapper,
             // unexpected, use default path
             path = "/quiz"
         }
-        println("[WSConfig] name: $podName, path: $path")
+        Logger.logPod(null, "[WSConfig] name: $podName, path: $path")
         return path
     }
 }
