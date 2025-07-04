@@ -19,7 +19,6 @@ class Game()
 
     // starting and stopping games
     fun start() {
-        println("GAME HAS STARTED")
         isStarted = true
         isEnded = false
         // load quiz (assume loaded by default)
@@ -32,7 +31,6 @@ class Game()
     }
 
     fun end() {
-        println("GAME HAS ENDED")
         isStarted = false
         isEnded = true
         // reset quiz
@@ -46,11 +44,9 @@ class Game()
 
         // change player score immediately based on answer
         if (quiz.getCurrentA().contains(ans)) {
-            println("$player has answered $ans [V] correct")
             player.qCorrect += 1
             return true
         } else {
-            println("$player has answered $ans [X] incorrect")
             return false
         }
 

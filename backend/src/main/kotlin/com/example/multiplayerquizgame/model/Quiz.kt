@@ -88,7 +88,6 @@ class Quiz() {
     fun getCurrentQ():Question {
         require(questionList.size > 0) {"ERROR: no questions!"}
         val q = questionList[currentIndex]
-        println("Current question: ${q.question}")
         return q
     }
 
