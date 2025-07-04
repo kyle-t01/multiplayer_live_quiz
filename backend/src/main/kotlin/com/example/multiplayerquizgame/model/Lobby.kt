@@ -6,12 +6,13 @@ import org.springframework.web.socket.WebSocketSession
 @Component
 class Lobby(
     val players: MutableMap<WebSocketSession, Player> = mutableMapOf(),
+    val logger: Logger
 ) {
 
     // remove a <session, player> from lobby on disconnect
     fun removePlayer(session: WebSocketSession): Player? {
         val player= players[session]
-        Logger.logWS(null, "$player LEFT the MAIN LOBBY! [${players.size -1} players left...]")
+        logger.logWS(null, "$player LEFT the MAIN LOBBY! [${players.size -1} players left...]")
         return players.remove(session)
     }
 
@@ -24,7 +25,7 @@ class Lobby(
     fun addToPlayers(session: WebSocketSession, player: Player) {
         // associate the session with this player
         players[session] = player
-        Logger.logWS(null, "$player JOINED the game! [${players.size} players]")
+        logger.logWS(null, "$player JOINED the game! [${players.size} players]")
         return
     }
 

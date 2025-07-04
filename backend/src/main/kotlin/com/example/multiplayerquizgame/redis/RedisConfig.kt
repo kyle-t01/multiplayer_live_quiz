@@ -15,7 +15,9 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import java.net.Socket
 
 @Configuration
-class RedisConfig {
+class RedisConfig (
+    private val logger: Logger
+) {
     @Bean
     fun connectionFactory(): LettuceConnectionFactory {
         return LettuceConnectionFactory(HOST, PORT)
@@ -57,7 +59,7 @@ class RedisConfig {
             container.addMessageListener(messageListener, serverBroadcastTopic)
             container
         } catch (e: Exception) {
-            Logger.logPod(null, "redis pub/sub down: $e")
+            logger.logPod(null, "redis pub/sub down: $e")
             null
         }
     }
@@ -71,7 +73,7 @@ class RedisConfig {
         return try {
             Socket(HOST, PORT).use { true }
         } catch (e: Exception) {
-            Logger.logPod(null, "redis pub/sub down: $e")
+            logger.logPod(null, "redis pub/sub down: $e")
             false
         }
     }

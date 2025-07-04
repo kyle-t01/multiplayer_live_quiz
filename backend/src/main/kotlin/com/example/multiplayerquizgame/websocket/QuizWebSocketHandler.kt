@@ -44,8 +44,9 @@ class QuizWebSocketHandler (
 
 @Configuration
 @EnableWebSocket
-class WSConfig(private val mapper:JsonMapper,
-               private val gameController: GameSessionController
+class WSConfig(
+    private val mapper:JsonMapper,
+    private val gameController: GameSessionController
 ): WebSocketConfigurer {
     override fun registerWebSocketHandlers(registry: WebSocketHandlerRegistry) {
         val path = getPath()
@@ -66,7 +67,7 @@ class WSConfig(private val mapper:JsonMapper,
             // unexpected, use default path
             path = "/quiz"
         }
-        Logger.logPod(null, "[WSConfig] name: $podName, path: $path")
+        println("[WSConfig] name: $podName, path: $path")
         return path
     }
 }

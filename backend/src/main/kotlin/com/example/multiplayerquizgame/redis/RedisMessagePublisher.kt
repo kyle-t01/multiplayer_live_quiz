@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component
     @Component
     class RedisMessagePublisher(
         private val redisTemplate: RedisTemplate<String, Any>?,
+        private val logger: Logger
     ) {
 
         /**
@@ -16,13 +17,13 @@ import org.springframework.stereotype.Component
          */
         fun publishToAll(message: String) {
             if (redisTemplate == null) {
-                Logger.logPod(null, "redis pub/sub offline, can not publish")
+                logger.logPod(null, "redis pub/sub offline, can not publish")
                 return
             }
 
 
             val topic = "$SERVER_BROADCAST_TOPIC:all"
-            Logger.logPod(null, "publishing to [$topic] with [$message]")
+            logger.logPod(null, "publishing to [$topic] with [$message]")
             redisTemplate.convertAndSend(topic, message)
         }
 
@@ -35,11 +36,11 @@ import org.springframework.stereotype.Component
          */
         fun publishToGateway(message: String) {
             if (redisTemplate == null) {
-                Logger.logPod(null, "redis pub/sub offline, can not PONG")
+                logger.logPod(null, "redis pub/sub offline, can not PONG")
                 return
             }
             val topic = "$SERVER_BROADCAST_TOPIC:pong"
-            Logger.logPod(null, "publishing to [$topic] with [$message]")
+            logger.logPod(null, "publishing to [$topic] with [$message]")
             redisTemplate.convertAndSend(topic, message)
         }
 

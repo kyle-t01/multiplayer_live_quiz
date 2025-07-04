@@ -3,7 +3,7 @@ import org.springframework.stereotype.Component
 
 // for now, Logger will be used as a singleton class accessible by everyone
 @Component
-object Logger {
+class Logger {
     // There are three types of logs
     // (1) Websocket logs - websocket GameEvents sent to backend gameLoop by player
     // (2) Backend Pod logs - redis, pod init logs, inter-pod communications

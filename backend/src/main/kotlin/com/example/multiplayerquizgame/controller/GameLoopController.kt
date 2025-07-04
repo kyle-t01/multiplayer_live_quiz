@@ -11,8 +11,10 @@ import kotlinx.coroutines.launch
 import org.springframework.web.socket.WebSocketSession
 import kotlin.random.Random
 
-class GameLoopController(private val lobby: Lobby,
-                         private val emitter: Emitter
+class GameLoopController(
+    private val lobby: Lobby,
+    private val emitter: Emitter,
+    private val logger: Logger
 )
 {
     // track gameLoop coroutine
@@ -48,13 +50,13 @@ class GameLoopController(private val lobby: Lobby,
      */
     fun handleGameEvent(player: Player, gameEvent: GameEvent) {
         val type = gameEvent.type
-        Logger.logWS(roomCode, "received $type from ${player.name}")
+        logger.logWS(roomCode, "received $type from ${player.name}")
         when(type) {
             GameEventType.CREATE -> handleCreate(player, gameEvent)
             GameEventType.JOIN -> handleJoin(player, gameEvent)
             GameEventType.START -> handleStart(player, gameEvent)
             GameEventType.ANSWER -> handleAnswer(player, gameEvent)
-            else -> Logger.logWS(roomCode, "unexpected usage of $type")
+            else -> logger.logWS(roomCode, "unexpected usage of $type")
         }
     }
 
@@ -114,11 +116,11 @@ class GameLoopController(private val lobby: Lobby,
     fun handleStart(player: Player, gameEvent: GameEvent) {
         // if started and not yet ended
         if (game.hasStarted()) {
-            Logger.logGL(roomCode, "game already in progress")
+            logger.logGL(roomCode, "game already in progress")
             return
         }
         // start the game
-        Logger.logGL(roomCode, "${player.name} started game for ${player.roomCode}")
+        logger.logGL(roomCode, "${player.name} started game for ${player.roomCode}")
         game.start()
 
         // update the initial score of all players
@@ -126,12 +128,12 @@ class GameLoopController(private val lobby: Lobby,
 
         // launch the game loop
         gameLoopJob = gameLoopScope.launch {
-            Logger.logGL(roomCode, "launched Game Loop Coroutine")
+            logger.logGL(roomCode, "launched Game Loop Coroutine")
             try {
                 // tell all players the game has started
                 emitStart()
                 // start the game loop
-                Logger.logGL(roomCode, "isStarted = ${game.hasStarted()}, isEnded =${game.hasEnded()}")
+                logger.logGL(roomCode, "isStarted = ${game.hasStarted()}, isEnded =${game.hasEnded()}")
                 val timer = TimerService(gameLoopScope)
                 while (!game.hasEnded()) {
                     if (hasNoPlayers()) {
@@ -148,7 +150,7 @@ class GameLoopController(private val lobby: Lobby,
                             timeLeft -> emitTime(timeLeft)
                         },
                         task = {
-                            Logger.logGL(roomCode, "finished answer timer")
+                            logger.logGL(roomCode, "finished answer timer")
                         }
                     )
                     answerTimer.join()
@@ -160,7 +162,7 @@ class GameLoopController(private val lobby: Lobby,
                                 timeLeft -> emitTime(timeLeft)
                         },
                         task = {
-                            Logger.logGL(roomCode, "finished reveal timer")
+                            logger.logGL(roomCode, "finished reveal timer")
                         }
                     )
                     revealTimer.join()
@@ -169,7 +171,7 @@ class GameLoopController(private val lobby: Lobby,
 
             } finally {
                 // any time coroutine exits
-                Logger.logGL(roomCode, "exiting coroutine")
+                logger.logGL(roomCode, "exiting coroutine")
                 game.end()
                 gameLoopJob = null
                 emitEnd()
@@ -183,9 +185,9 @@ class GameLoopController(private val lobby: Lobby,
         // validate
         val correct = game.validatePlayerAnswer(player, ans)
         if (correct) {
-            Logger.logGL(roomCode, "$player has answered $ans [V] correct")
+            logger.logGL(roomCode, "$player has answered $ans [V] correct")
         } else {
-            Logger.logGL(roomCode, "$player has answered $ans [X] incorrect")
+            logger.logGL(roomCode, "$player has answered $ans [X] incorrect")
         }
         // give feedback
         emitAnswer(player)
@@ -241,7 +243,7 @@ class GameLoopController(private val lobby: Lobby,
     fun emitQuestion() {
         val q = game.getCurrentQuestion()
         val event = GameEvent(GameEventType.QUESTION, q)
-        Logger.logGL(roomCode, q.question)
+        logger.logGL(roomCode, q.question)
         emitToGameLobby(event)
     }
 
