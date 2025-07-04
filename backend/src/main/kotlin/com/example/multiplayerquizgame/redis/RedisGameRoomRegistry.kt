@@ -1,5 +1,6 @@
 package com.example.multiplayerquizgame.redis
 
+import com.example.multiplayerquizgame.log.Logger
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 @Service
@@ -17,7 +18,7 @@ class RedisGameRoomRegistry (
      */
     fun addRoomToPod(roomCode: String, podName: String) {
         if (!hasRedisConnection()) return
-        println("$podName owns $roomCode")
+        Logger.logPod(roomCode, "add room to pod")
         sadd(podName, roomCode)
     }
 
@@ -29,7 +30,7 @@ class RedisGameRoomRegistry (
      */
     fun removeRoomFromPod(roomCode: String, podName: String) {
         if (!hasRedisConnection()) return
-        println("$podName no longer owns $roomCode")
+        Logger.logPod(roomCode, "remove room from pod")
         srem(podName, roomCode)
     }
 
@@ -41,7 +42,7 @@ class RedisGameRoomRegistry (
     fun removeAllRoomsOfPod(podName: String) {
         if (!hasRedisConnection()) return
         val podSet = smembers(podName)
-        println("removing all rooms of pod $podName")
+        Logger.logPod(null, "remove all rooms of pod")
         for (member in podSet) {
             srem(podName, member)
         }
@@ -54,7 +55,7 @@ class RedisGameRoomRegistry (
      */
     fun hasRedisConnection(): Boolean {
         if (redisTemplate == null) {
-            println("RedisGameRoomRegistry: No connection to Redis!")
+            Logger.logPod(null, "no connection to redis!")
             return false
         }
         return true

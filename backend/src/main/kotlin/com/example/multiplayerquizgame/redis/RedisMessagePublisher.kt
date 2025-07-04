@@ -1,5 +1,6 @@
 package com.example.multiplayerquizgame.redis
 
+import com.example.multiplayerquizgame.log.Logger
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 
@@ -15,13 +16,13 @@ import org.springframework.stereotype.Component
          */
         fun publishToAll(message: String) {
             if (redisTemplate == null) {
-                println("redis pub/sub offline, can not publish")
+                Logger.logPod(null, "redis pub/sub offline, can not publish")
                 return
             }
 
 
             val topic = "$SERVER_BROADCAST_TOPIC:all"
-            println("publishing to [$topic] with [$message]")
+            Logger.logPod(null, "publishing to [$topic] with [$message]")
             redisTemplate.convertAndSend(topic, message)
         }
 
@@ -34,11 +35,11 @@ import org.springframework.stereotype.Component
          */
         fun publishToGateway(message: String) {
             if (redisTemplate == null) {
-                println("redis pub/sub offline, can not PONG")
+                Logger.logPod(null, "redis pub/sub offline, can not PONG")
                 return
             }
             val topic = "$SERVER_BROADCAST_TOPIC:pong"
-            println("publishing to [$topic] with [$message]")
+            Logger.logPod(null, "publishing to [$topic] with [$message]")
             redisTemplate.convertAndSend(topic, message)
         }
 

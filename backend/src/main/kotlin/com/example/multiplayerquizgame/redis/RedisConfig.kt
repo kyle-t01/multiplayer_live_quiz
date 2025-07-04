@@ -1,5 +1,6 @@
 package com.example.multiplayerquizgame.redis
 
+import com.example.multiplayerquizgame.log.Logger
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -7,7 +8,6 @@ import org.springframework.data.redis.connection.MessageListener
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.*
-import org.springframework.data.redis.listener.ChannelTopic
 import org.springframework.data.redis.listener.PatternTopic
 import org.springframework.data.redis.listener.RedisMessageListenerContainer
 import org.springframework.data.redis.listener.adapter.MessageListenerAdapter
@@ -57,7 +57,7 @@ class RedisConfig {
             container.addMessageListener(messageListener, serverBroadcastTopic)
             container
         } catch (e: Exception) {
-            println("Redis pub/sub not available: $e")
+            Logger.logPod(null, "redis pub/sub down: $e")
             null
         }
     }
@@ -71,7 +71,7 @@ class RedisConfig {
         return try {
             Socket(HOST, PORT).use { true }
         } catch (e: Exception) {
-            println("no redis connection: $e")
+            Logger.logPod(null, "redis pub/sub down: $e")
             false
         }
     }
