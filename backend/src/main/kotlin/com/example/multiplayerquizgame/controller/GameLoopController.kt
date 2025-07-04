@@ -1,5 +1,6 @@
 package com.example.multiplayerquizgame.controller
 
+import com.example.multiplayerquizgame.log.Logger
 import com.example.multiplayerquizgame.model.*
 import com.example.multiplayerquizgame.util.TimerService
 import com.fasterxml.jackson.databind.JsonNode
@@ -24,7 +25,6 @@ class GameLoopController(private val lobby: Lobby,
         // generate ID (not unique)
         fun generateRoomCode(): String{
             val id = Random.nextInt(0,10000).toString().padStart(GAME_ID_LENGTH,'0')
-            println("Added game: ${id}")
             return id
         }
         val GAME_ID_LENGTH = 4
@@ -48,13 +48,13 @@ class GameLoopController(private val lobby: Lobby,
      */
     fun handleGameEvent(player: Player, gameEvent: GameEvent) {
         val type = gameEvent.type
-
+        Logger.logWS(roomCode, "received $type from ${player.name}")
         when(type) {
             GameEventType.CREATE -> handleCreate(player, gameEvent)
             GameEventType.JOIN -> handleJoin(player, gameEvent)
             GameEventType.START -> handleStart(player, gameEvent)
             GameEventType.ANSWER -> handleAnswer(player, gameEvent)
-            else -> println("$player unexpected usage of ${gameEvent}!")
+            else -> Logger.logWS(roomCode, "unexpected usage of $type")
         }
     }
 
@@ -114,11 +114,11 @@ class GameLoopController(private val lobby: Lobby,
     fun handleStart(player: Player, gameEvent: GameEvent) {
         // if started and not yet ended
         if (game.hasStarted()) {
-            println("Game is already in progress...")
+            Logger.logGL(roomCode, "game already in progress")
             return
         }
         // start the game
-        println("${player.name} started game for ${player.roomCode}")
+        Logger.logGL(roomCode, "${player.name} started game for ${player.roomCode}")
         game.start()
 
         // update the initial score of all players
@@ -126,12 +126,12 @@ class GameLoopController(private val lobby: Lobby,
 
         // launch the game loop
         gameLoopJob = gameLoopScope.launch {
-            println("Launched Game Loop Coroutine")
+            Logger.logGL(roomCode, "launched Game Loop Coroutine")
             try {
                 // tell all players the game has started
                 emitStart()
                 // start the game loop
-                println("game status: isStarted = ${game.hasStarted()}, isEnded =${game.hasEnded()}")
+                Logger.logGL(roomCode, "isStarted = ${game.hasStarted()}, isEnded =${game.hasEnded()}")
                 val timer = TimerService(gameLoopScope)
                 while (!game.hasEnded()) {
                     if (hasNoPlayers()) {
@@ -148,13 +148,10 @@ class GameLoopController(private val lobby: Lobby,
                             timeLeft -> emitTime(timeLeft)
                         },
                         task = {
-                            println("finished answerTimer...")
+                            Logger.logGL(roomCode, "finished answer timer")
                         }
                     )
                     answerTimer.join()
-
-
-
                     emitShow()
                     emitTotalRevealTime()
                     // reveal answers
@@ -163,7 +160,7 @@ class GameLoopController(private val lobby: Lobby,
                                 timeLeft -> emitTime(timeLeft)
                         },
                         task = {
-                            println("finished revealTimer...")
+                            Logger.logGL(roomCode, "finished reveal timer")
                         }
                     )
                     revealTimer.join()
@@ -172,7 +169,7 @@ class GameLoopController(private val lobby: Lobby,
 
             } finally {
                 // any time coroutine exits
-                println("exiting coroutine")
+                Logger.logGL(roomCode, "exiting coroutine")
                 game.end()
                 gameLoopJob = null
                 emitEnd()
@@ -182,10 +179,14 @@ class GameLoopController(private val lobby: Lobby,
     }
 
     fun handleAnswer(player: Player, gameEvent: GameEvent) {
-        // TODO: multiple player answers
         val ans: Int = gameEvent.data.toString().toInt()
         // validate
-        game.validatePlayerAnswer(player, ans)
+        val correct = game.validatePlayerAnswer(player, ans)
+        if (correct) {
+            Logger.logGL(roomCode, "$player has answered $ans [V] correct")
+        } else {
+            Logger.logGL(roomCode, "$player has answered $ans [X] incorrect")
+        }
         // give feedback
         emitAnswer(player)
         // broadcast state change to everyone
@@ -240,6 +241,7 @@ class GameLoopController(private val lobby: Lobby,
     fun emitQuestion() {
         val q = game.getCurrentQuestion()
         val event = GameEvent(GameEventType.QUESTION, q)
+        Logger.logGL(roomCode, q.question)
         emitToGameLobby(event)
     }
 
