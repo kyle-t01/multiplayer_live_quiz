@@ -1,4 +1,5 @@
 package com.example.multiplayerquizgame.model
+import com.example.multiplayerquizgame.log.Logger
 import org.springframework.stereotype.Component
 import org.springframework.web.socket.WebSocketSession
 
@@ -10,7 +11,7 @@ class Lobby(
     // remove a <session, player> from lobby on disconnect
     fun removePlayer(session: WebSocketSession): Player? {
         val player= players[session]
-        println("$player LEFT the MAIN LOBBY! [${players.size -1} players left...]")
+        Logger.logWS(null, "$player LEFT the MAIN LOBBY! [${players.size -1} players left...]")
         return players.remove(session)
     }
 
@@ -23,7 +24,7 @@ class Lobby(
     fun addToPlayers(session: WebSocketSession, player: Player) {
         // associate the session with this player
         players[session] = player
-        println("$player JOINED the game! [${players.size} players]")
+        Logger.logWS(null, "$player JOINED the game! [${players.size} players]")
         return
     }
 
