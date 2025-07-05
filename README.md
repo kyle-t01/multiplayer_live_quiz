@@ -2,7 +2,7 @@
 
 This is a real-time multiplayer quiz app built with `Kotlin`, `Spring Boot`, and `WebSockets`.
 It is containerised with `Docker`, and deployed via a `Jenkins` CI/CD pipeline to an AWS `EC2` instance.
-It uses `Redis` for backend coordination, and `Kubernetes` (Minikube) for scaling.
+`Redis` is used for backend pod coordination, and `Kubernetes` (Minikube) for horizontal scaling of WebSocket pods.
 You can compete in a live real-time quiz with other players in a shared lobby.
 
 Take a look at the project here:
@@ -25,10 +25,10 @@ Take a look at the project here:
 - game rooms are created in least-loaded pods
 
 ## Technologies Used
-- **Backend**: Kotlin + Spring Boot, WebSockets, Kotlin Coroutines
+- **Backend**: Kotlin + Spring Boot, WebSockets, Kotlin Coroutines, PostgreSQL
 - **Frontend**: React.js
 - **Devops CI/CD**: Kubernetes (Minikube), Docker, Docker Compose, AWS EC2, Jenkins
-- **Other**: Bash scripting, SSH, SCP, Redis Pub/Sub, NGINX Ingress
+- **Other**: Bash scripting, SSH, SCP, Redis Pub/Sub, NGINX Ingress, pgAdmin
 
 ### App Screenshots
 
@@ -63,7 +63,9 @@ In terms of how `Kubernetes` was used locally:
 3. `Gateway` responds with a redirect path to frontend (/quiz/<id>)
 4. `Frontend` reconnects to new path via `Nginx Ingress`
 5. The connected `backend pod`, (deployed as part of a `Kubernetes StatefulSet` with 2 replicas), maintains game state and player activity
-6. `Redis Pub Sub` is used to propagate whether a `backend pod` is available to `Gateway`
+6. Any `Redis`, `Websocket`, and game logs are written to the `PostgreSQL database`
+7. 7`Redis Pub Sub` is used to propagate whether a `backend pod` is available to `Gateway`
+
 
 ## Live Project link:
 [Multiplayer Live Quiz](http://54.79.146.28)
@@ -77,7 +79,13 @@ In terms of how `Kubernetes` was used locally:
 4. Questions are timed, and scores are updated real-time
 ```
 
-## Addendum
-After completing this project, I felt the urge to create something more complex and "interactive" than just a simple quiz game.
-So I've started working on my next real-time multiplayer project: Chaos Chess Online, where you could mix and match pieces from different chess games (Xiangqi, Checkers, Chess)!
-You will be able to play against other players, or with a mini-maxing AI!
+## Further Improvements
+### Redis currently is a Single Point of Failure in Pod Communications
+- Redis handles backend coordination and communicating which pod owns which game room
+- If Redis goes offline, gateway loses track of active backend pods
+- A possible improvement would be to explore distributed message brokers like Kafka or RabbitMQ to replace Redis Pub/Sub for fault-tolerant communication.
+
+### Deploy PostgreSQL as Kubernetes StatefulSet
+- PostgreSQL current runs as a container within docker compose 
+- Can deploy PostgreSQL as a Kubernetes StatefulSet with Persistent Volume Claims to ensure resilience and persistent storage
+
